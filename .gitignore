@@ -1,4 +1,6 @@
 node_modules/
-chrome/
+chrome/*
+!chrome/*.md
+!chrome/*.js
 yarn.lock
 *.png

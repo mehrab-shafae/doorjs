@@ -1,9 +1,10 @@
 import puppeteer from "puppeteer";
 // Or import puppeteer from 'puppeteer-core';
+import { chromePath } from "./chrome/path.js";
 
 const browser = await puppeteer.launch({
   headless: true,
-  executablePath: "./chrome/linux-132.0.6834.159/chrome-linux64/chrome", // مسیر Chrome نصب شده
+  executablePath: chromePath, // مسیر Chrome نصب شده
 });
 
 {
