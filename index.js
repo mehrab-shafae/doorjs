@@ -39,7 +39,8 @@ const browser = await puppeteer.launch({
   await page.screenshot({ path: "example3.png" });
 
   const cookies = await page.cookies();
-  console.log(cookies);
+  const cookieString = cookies.map(cookie => `${cookie.name}=${cookie.value}`).join(';');
+  console.log(cookieString);
 
   await browser.close();
 }
