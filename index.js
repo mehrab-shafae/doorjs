@@ -1,4 +1,6 @@
 import puppeteer from "puppeteer";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 const chromeLauncher = require("chrome-launcher");
 
 async function getChromePath() {
