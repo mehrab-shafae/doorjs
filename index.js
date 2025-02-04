@@ -1,17 +1,21 @@
 import puppeteer from "puppeteer";
-import * as ChromeLauncher from 'chrome-launcher';
 
-async function getChromePath() {
-  const chromePath = await ChromeLauncher.launch({ chromeFlags: ['--headless', '--disable-gpu'] });
-  return chromePath;
+let browser;
+const proxy = "--proxy-server=http://127.0.0.1:7273";
+
+try {
+  browser = await puppeteer.launch({
+    headless: true,
+    executablePath: "/usr/bin/google-chrome-stable",
+    args: [proxy],
+  });
+} catch (e) {
+  browser = await puppeteer.launch({
+    headless: true,
+    executablePath: "/usr/bin/google-chrome",
+    args: [proxy],
+  });
 }
-
-const chromePath = await getChromePath();
-
-const browser = await puppeteer.launch({
-  headless: true,
-  executablePath: chromePath,
-});
 
 {
   const page = await browser.newPage();
@@ -26,27 +30,29 @@ const browser = await puppeteer.launch({
   });
   await page.reload({ ignoreCache: true });
 
-  await new Promise(resolve => setTimeout(resolve, 8000));
+  await new Promise((resolve) => setTimeout(resolve, 8000));
 
-  await page.screenshot({ path: "example1.png" });
+  //await page.screenshot({ path: "example1.png" });
 
   await page.click('button[data-cy="login-btn"]');
 
-  await new Promise(resolve => setTimeout(resolve, 5000));
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  await page.screenshot({ path: "example2.png" });
+  //await page.screenshot({ path: "example2.png" });
 
-  await page.type('input[name="email"]', 'gowale4557@maonyn.com');
-  await page.type('input[name="current-password"]', '_CTnHEaGSh-ye4M');
+  await page.type('input[name="email"]', "gowale4557@maonyn.com");
+  await page.type('input[name="current-password"]', "_CTnHEaGSh-ye4M");
 
   await page.click("button.MuiButton-containedPrimary");
 
-  await new Promise(resolve => setTimeout(resolve, 20000));
+  await new Promise((resolve) => setTimeout(resolve, 20000));
 
-  await page.screenshot({ path: "example3.png" });
+  //await page.screenshot({ path: "example3.png" });
 
   const cookies = await page.cookies();
-  const cookieString = cookies.map(cookie => `${cookie.name}=${cookie.value}`).join(';');
+  const cookieString = cookies
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join(";");
   console.log(cookieString);
 
   await browser.close();

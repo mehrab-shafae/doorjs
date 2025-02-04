@@ -10,7 +10,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "chrome-launcher": "^1.1.2",
     "puppeteer": "^24.1.1",
     "puppeteer-core": "^24.1.1"
   }
