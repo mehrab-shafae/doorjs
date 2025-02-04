@@ -1,10 +1,8 @@
 import puppeteer from "puppeteer";
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const chromeLauncher = require("chrome-launcher");
+import * as ChromeLauncher from 'chrome-launcher';
 
 async function getChromePath() {
-  const chromePath = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+  const chromePath = await ChromeLauncher.launch({ chromeFlags: ['--headless', '--disable-gpu'] });
   return chromePath;
 }
 
