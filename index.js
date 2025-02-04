@@ -1,5 +1,5 @@
 import puppeteer from "puppeteer";
-import chromeLauncher from "chrome-launcher";
+const chromeLauncher = require("chrome-launcher");
 
 async function getChromePath() {
   const chromePath = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
