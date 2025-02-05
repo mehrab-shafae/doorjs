@@ -8,3 +8,4 @@ yarn.lock
 *.py
 log/
 logs/
+*data*json*

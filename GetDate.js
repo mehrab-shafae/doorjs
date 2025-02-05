@@ -2,8 +2,16 @@ import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { createLogger, format, transports } from 'winston';
 import axios from 'axios';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { abc_get_data } from './abc_get_data.js';
+import fs from 'fs';
+
+function convertTimestampToISO(timestampInt) {
+    return moment.unix(timestampInt)
+        .tz("UTC")
+        .toISOString()
+        .replace("+00:00", "Z");
+}
 
 // Constants
 const LEVEL_LOGGING = 'info';
@@ -107,7 +115,7 @@ class GetDataGlassnode extends abc_get_data {
   }
 
   _timestampToISO(timestamp) {
-    return moment.unix(timestamp).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+    return convertTimestampToISO(timestamp);
   }
 
   async getAll() {
@@ -157,5 +165,15 @@ const authHeadersGlassnode = "_gcl_au=1.1.283463486.1737619791; _hjSessionUser_1
 (async () => {
   const getData = new GetDataGlassnode("SOL", authHeadersGlassnode);
 //   console.log(await getData.getAll());
-  console.log(await getData.getLast(1738627200));
+    const data = await getData.getAll();
+
+    fs.writeFile('data.json', JSON.stringify(data), (err) => {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log('داده‌ها با موفقیت ذخیره شدند.');
+    }
+    });
+
+//   console.log(await getData.getLast(1738627200));
 })();
