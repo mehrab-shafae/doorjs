@@ -6,3 +6,5 @@ yarn.lock
 *.png
 *lock*
 *.py
+log/
+logs/
