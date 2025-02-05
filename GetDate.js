@@ -1,9 +1,7 @@
 import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { createLogger, format, transports } from 'winston';
-// import { get } from 'axios';
 import axios from 'axios';
-// import { unix } from 'moment';
 import moment from 'moment';
 import { abc_get_data } from './abc_get_data.js';
 
@@ -154,7 +152,6 @@ class GetDataGlassnode extends abc_get_data {
   }
 }
 
-// Usage example
 const authHeadersGlassnode = "_gcl_au=1.1.283463486.1737619791; _hjSessionUser_1425107=eyJpZCI6IjdkMjA4ZDk5LTcwYmQtNWYxZi04ODQ4LTc4ZWFmZjFhZGE5NSIsImNyZWF0ZWQiOjE3Mzc2MTk4MDM5NDksImV4aXN0aW5nIjp0cnVlfQ==; _ga_YYWW6JR31S=GS1.1.1738139037.1.1.1738139080.0.0.0; _gid=GA1.2.607682865.1738475245; _legacy_auth0.M5sT98VT4FUrQNn1p96VeTnR2iTr6qou.is.authenticated=true; auth0.M5sT98VT4FUrQNn1p96VeTnR2iTr6qou.is.authenticated=true; _hjSession_1425107=eyJpZCI6IjcyNDhiZjUyLWJiMWEtNDQzOC04YWIxLWFhNTg5NDJhNWYwYyIsImMiOjE3Mzg2NzUyNzE0NjIsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjowLCJzcCI6MH0=; ajs_user_id=cus_VayYNBDomLpb5wLj; ajs_anonymous_id=a6f08ab9-c482-4075-9124-e891002a9501; _ga=GA1.2.1654294171.1737619798; _ga_M9YVRZCN8G=GS1.1.1738675264.32.1.1738675814.0.0.0; _ga_MT5MWT6847=GS1.1.1738675264.32.1.1738675814.6.0.0; _s=MTczODY3NTg0N3w0UGFwOVdNYjdxUEhkX044aGsyV2FhcVVuWU1Tbm1lcDRCRlM3QmpSazRBOG9DcFFKcWdWbjBtYUhlVWRHWFk9fHXUqqSAQrsomD1YrFfgRfHIDzD6jSy06CXvBxmLRI5n";
 
 (async () => {
