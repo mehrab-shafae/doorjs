@@ -4,3 +4,5 @@ chrome/*
 !chrome/*.js
 yarn.lock
 *.png
+*lock*
+*.py
