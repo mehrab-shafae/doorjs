@@ -3,10 +3,10 @@ import { join } from "path";
 import { createLogger, format, transports } from "winston";
 import axios from "axios";
 import moment from "moment-timezone";
-import { abc_get_data } from "./abc_get_data.js";
+import { abs_get_data } from "./abs_get_data.js";
 import fs from "fs";
 
-function convertTimestampToISO(timestampInt) {
+function convertTimestampToISO(timestampInt: number) {
   return moment
     .unix(timestampInt)
     .tz("UTC")
@@ -61,7 +61,7 @@ const logger = createLogger({
   ],
 });
 
-class GetDataGlassnode extends abc_get_data {
+class GetDataGlassnode extends abs_get_data {
   constructor(symbol, authHeadersGlassnode) {
     super();
     this.symbol = symbol;
@@ -77,7 +77,7 @@ class GetDataGlassnode extends abc_get_data {
     this.headers = { ...HEADER_GLASSNODE_REQUESTS };
   }
 
-  async _checkConnection(status, lastTimestamp = null) {
+  async _checkConnection(status: string, lastTimestamp = null) {
     // if (this.symbol !== "SOL" || this.symbol !== "DOGE") {
     //   logger.error(`Input is incorrect, ${this.symbol} != SOL/DOGE`);
     //   return null;
@@ -133,13 +133,13 @@ class GetDataGlassnode extends abc_get_data {
 
       logger.error("Connection to Glassnode failed");
       return null;
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Connection error: ${error.message}`);
       return null;
     }
   }
 
-  _timestampToISO(timestamp) {
+  _timestampToISO(timestamp: number) {
     return convertTimestampToISO(timestamp);
   }
 
