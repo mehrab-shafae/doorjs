@@ -9,3 +9,4 @@ yarn.lock
 log/
 logs/
 *data*json*
+dist/

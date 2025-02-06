@@ -7,13 +7,13 @@ try {
   browser = await puppeteer.launch({
     headless: true,
     executablePath: "/usr/bin/google-chrome-stable",
-    args: [proxy],
+    // args: [proxy],
   });
 } catch (e) {
   browser = await puppeteer.launch({
     headless: true,
     executablePath: "/usr/bin/google-chrome",
-    args: [proxy],
+    // args: [proxy],
   });
 }
 
@@ -32,13 +32,13 @@ try {
 
   await new Promise((resolve) => setTimeout(resolve, 8000));
 
-  //await page.screenshot({ path: "example1.png" });
+  await page.screenshot({ path: "example1.png" });
 
   await page.click('button[data-cy="login-btn"]');
 
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  //await page.screenshot({ path: "example2.png" });
+  await page.screenshot({ path: "example2.png" });
 
   await page.type('input[name="email"]', "gowale4557@maonyn.com");
   await page.type('input[name="current-password"]', "_CTnHEaGSh-ye4M");
@@ -47,7 +47,7 @@ try {
 
   await new Promise((resolve) => setTimeout(resolve, 20000));
 
-  //await page.screenshot({ path: "example3.png" });
+  await page.screenshot({ path: "example3.png" });
 
   const cookies = await page.cookies();
   const cookieString = cookies

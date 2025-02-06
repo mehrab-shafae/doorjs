@@ -1,7 +1,7 @@
 import { Core } from "@marboris/core";
 
 new (class extends Core {
-  Main() {
+  async Main() {
     console.log("Hi");
   }
 })();
