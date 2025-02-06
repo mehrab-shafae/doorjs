@@ -196,18 +196,42 @@ export default function (authHeadersGlassnode: string) {
   (async () => {
     let solData: string, dogeData: string; // objects finally
 
-    async function processNodes(nodes: any) {
-      const promises = nodes.map(
-        async ({ node, saveTo }: { node: string; saveTo: string }) => {
-          console.log(node);
-          const getData = new GetDataGlassnode(node, authHeadersGlassnode);
-          const data = await getData.getAll();
-
-          eval(`${saveTo} = JSON.stringify(data)`);
+    async function sendDataToApi(data: any) {
+        try {
+            const res = await axios.post('http://91.107.149.166:6565/feed/', JSON.stringify(data), {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            console.log('Response:', res.status);
+        } catch (error) {
+            console.error('Axios error!');
+            throw error;
         }
-      );
+    }
 
-      await Promise.all(promises);
+    async function processNodes(nodes: Array<{ node: string; saveTo: string }>) {
+        const promises = nodes.map(async ({ node, saveTo }) => {
+            try {
+                console.log(node);
+                const getData = new GetDataGlassnode(node, authHeadersGlassnode);
+                const data = await getData.getAll();
+
+                if (!data) {
+                    throw new Error('data is null!');
+                }
+
+                eval(`${saveTo} = JSON.stringify(data)`);
+
+                console.log("send data to api");
+                await sendDataToApi(data);
+            } catch (error) {
+                console.error('Error occurred:', error);
+            }
+        });
+
+        await Promise.all(promises);
     }
 
     const nodes = [
@@ -258,19 +282,6 @@ export default function (authHeadersGlassnode: string) {
     //           console.error('Error:', error);
     //         });
     //     }
-    // });
-
-    // axios.post('http://172.18.8.96:8585/feed/', JSON.stringify(data), {
-    //   headers: {
-    //     'Accept': 'application/json',
-    //     'Content-Type': 'application/json'
-    //   }
-    // })
-    // .then(response => {
-    //   console.log('Response:', response.data);
-    // })
-    // .catch(error => {
-    //   console.error('Error:', error);
     // });
 
     //   console.log(await getData.getLast(1738627200));

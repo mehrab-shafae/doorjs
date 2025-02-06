@@ -5,6 +5,8 @@ import puppeteer from "puppeteer";
 import cron from "node-cron";
 import moment from "moment-timezone";
 
+import GetDate from "./GetDate.js";
+
 new (class extends Core {
   Main() {
     /*
@@ -15,7 +17,6 @@ new (class extends Core {
         console.log(
           `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
         ); */
-    try {
       (async () => {
         let browser;
 
@@ -47,13 +48,17 @@ new (class extends Core {
 
           await new Promise((resolve) => setTimeout(resolve, 8000));
 
-          await page.screenshot({ path: "1.png" });
+          try{
+            await page.screenshot({ path: "1.png" });
+          }catch(_){}
 
           await page.click('button[data-cy="login-btn"]');
 
           await new Promise((resolve) => setTimeout(resolve, 5000));
 
-          await page.screenshot({ path: "2.png" });
+          try{
+            await page.screenshot({ path: "2.png" });
+          }catch(_){}
 
           await page.type('input[name="email"]', this.config.EnvConfig.email);
           await page.type(
@@ -65,20 +70,28 @@ new (class extends Core {
 
           await new Promise((resolve) => setTimeout(resolve, 20000));
 
-          await page.screenshot({ path: "3.png" });
+          try{
+            await page.screenshot({ path: "3.png" });
+          }catch(_){}
 
           const cookies = await page.cookies();
+
+          const ajsCookie = cookies.find(cookie => cookie.name === 'ajs_anonymous_id');
+
+          if (!ajsCookie || !ajsCookie.value) {
+              throw new Error('cookie ajs_anonymous_id not found or is null :( \n change the server');
+          }
+
           const cookieString = cookies
             .map((cookie) => `${cookie.name}=${cookie.value}`)
             .join(";");
           console.log(cookieString);
 
           await browser.close();
+
+          GetDate(cookieString);
         }
       })();
-    } catch (e) {
-      console.log(`[error] ~{19}\`Main\`: ${e}`);
-    }
     /*
       },
       {
