@@ -18,8 +18,6 @@ const LEVEL_LOGGING = 'info';
 const TIME_SLEEP = 10;
 const ENDPOINT_GLASSNODE_TX = "https://api.glassnode.com/v1/metrics/transactions/count";
 const ENDPOINT_GLASSNODE_FEE = "https://api.glassnode.com/v1/metrics/fees/volume_sum";
-const PARAMS_GLASSNODE_TX = { a: "SOL", i: "24h", referrer: "charts" };
-const PARAMS_GLASSNODE_FEE = { a: "SOL", i: "24h", referrer: "charts" };
 const HEADER_GLASSNODE_REQUESTS = {
   'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0',
   'sec-ch-ua': '"Not A(Brand";v="8", "Chromium";v="132", "Microsoft Edge";v="132"'
@@ -63,16 +61,21 @@ class GetDataGlassnode extends abc_get_data {
     this.authHeaders = authHeadersGlassnode;
     this.endpointTx = ENDPOINT_GLASSNODE_TX;
     this.endpointFee = ENDPOINT_GLASSNODE_FEE;
+
+    const PARAMS_GLASSNODE_TX = { a: symbol, i: "24h", referrer: "charts" };
+    const PARAMS_GLASSNODE_FEE = { a: symbol, i: "24h", referrer: "charts" };
+
+
     this.paramsTx = { ...PARAMS_GLASSNODE_TX };
     this.paramsFee = { ...PARAMS_GLASSNODE_FEE };
     this.headers = { ...HEADER_GLASSNODE_REQUESTS };
   }
 
   async _checkConnection(status, lastTimestamp = null) {
-    if (this.symbol !== "SOL") {
-      logger.error(`Input is incorrect, ${this.symbol} != SOL`);
-      return null;
-    }
+    // if (this.symbol !== "SOL" || this.symbol !== "DOGE") {
+    //   logger.error(`Input is incorrect, ${this.symbol} != SOL/DOGE`);
+    //   return null;
+    // }
 
     this.headers.cookie = this.authHeaders;
 
@@ -150,7 +153,8 @@ class GetDataGlassnode extends abc_get_data {
 
     for (const [timestamp, values] of Object.entries(txData)) {
       processedData.push({
-        date: this._timestampToISO(parseInt(timestamp)),
+        symbol: this.symbol,
+        time: parseInt(timestamp), // this._timestampToISO
         number_of_transactions: values.transactions,
         total_fees_unit: values.fees || null
       });
@@ -163,17 +167,99 @@ class GetDataGlassnode extends abc_get_data {
 const authHeadersGlassnode = "_gcl_au=1.1.283463486.1737619791; _hjSessionUser_1425107=eyJpZCI6IjdkMjA4ZDk5LTcwYmQtNWYxZi04ODQ4LTc4ZWFmZjFhZGE5NSIsImNyZWF0ZWQiOjE3Mzc2MTk4MDM5NDksImV4aXN0aW5nIjp0cnVlfQ==; _ga_YYWW6JR31S=GS1.1.1738139037.1.1.1738139080.0.0.0; _gid=GA1.2.607682865.1738475245; _legacy_auth0.M5sT98VT4FUrQNn1p96VeTnR2iTr6qou.is.authenticated=true; auth0.M5sT98VT4FUrQNn1p96VeTnR2iTr6qou.is.authenticated=true; _hjSession_1425107=eyJpZCI6IjcyNDhiZjUyLWJiMWEtNDQzOC04YWIxLWFhNTg5NDJhNWYwYyIsImMiOjE3Mzg2NzUyNzE0NjIsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjowLCJzcCI6MH0=; ajs_user_id=cus_VayYNBDomLpb5wLj; ajs_anonymous_id=a6f08ab9-c482-4075-9124-e891002a9501; _ga=GA1.2.1654294171.1737619798; _ga_M9YVRZCN8G=GS1.1.1738675264.32.1.1738675814.0.0.0; _ga_MT5MWT6847=GS1.1.1738675264.32.1.1738675814.6.0.0; _s=MTczODY3NTg0N3w0UGFwOVdNYjdxUEhkX044aGsyV2FhcVVuWU1Tbm1lcDRCRlM3QmpSazRBOG9DcFFKcWdWbjBtYUhlVWRHWFk9fHXUqqSAQrsomD1YrFfgRfHIDzD6jSy06CXvBxmLRI5n";
 
 (async () => {
-  const getData = new GetDataGlassnode("SOL", authHeadersGlassnode);
-//   console.log(await getData.getAll());
+
+  // let solData, dogeData; // objects finally
+  // const nodes = [{node: "SOL", saveTo: solData}, {node: "DOGE", saveTo: dogeData}];
+  // nodes.forEach(node => {
+  //   console.log("node: ", node)
+  //   node.forEach(dot => {
+  //     console.log("dot: ", dot)
+  //   });
+  //   // const getData = new GetDataGlassnode(node, authHeadersGlassnode);
+  //   // console.log(await getData.getAll());
+  //   // const data = await getData.getAll();
+  // });
+
+
+  let solData, dogeData; // objects finally
+  const nodes = [
+    { node: "SOL", saveTo: "solData" },
+    { node: "DOGE", saveTo: "dogeData" }
+  ];
+
+  // const data = {
+  //   SOL: { price: 20, marketCap: 1000000 },
+  //   DOGE: { price: 0.5, marketCap: 500000 }
+  // };
+
+  // nodes.forEach(async ({ node, saveTo }) => {
+  //   // if (node in data) {
+  //   //   eval(`${saveTo} = data[node]`);
+  //   // }
+
+  //   console.log(node);
+    const getData = new GetDataGlassnode("SOL", authHeadersGlassnode);
+    console.log(await getData.getAll());
     const data = await getData.getAll();
 
-    fs.writeFile('data.json', JSON.stringify(data), (err) => {
-    if (err) {
-        console.error(err);
-    } else {
-        console.log('داده‌ها با موفقیت ذخیره شدند.');
-    }
-    });
+    console.log('solData: ', data);
+    return;
+    // eval(`${saveTo} = JSON.stringify(data)`);
+
+    // 
+    // fs.writeFile('data-sol.json', solData, (err) => {
+    //   if (err) {
+    //       console.error(err);
+    //   } else {
+    //       console.log('saved');
+    //   }
+    //   });
+  
+    //   fs.writeFile('data-doge.json', dogeData, (err) => {
+    //     if (err) {
+    //         console.error(err);
+    //     } else {
+    //         console.log('saved');
+    //     }
+    //     });
+  // });
+
+
+    
+
+  //   fs.readFile('data.json', 'utf8', (err, fileData) => {
+  //     if (err) {
+  //         console.error(err);
+  //     } else {
+  //         // console.log('Read data:', fileData);
+  //         axios.post('http://172.18.8.96:8585/feed/', fileData, {
+  //           headers: {
+  //             'Accept': 'application/json',
+  //             'Content-Type': 'application/json'
+  //           }
+  //         })
+  //         .then(response => {
+  //           console.log('Response:', response.data);
+  //         })
+  //         .catch(error => {
+  //           console.error('Error:', error);
+  //         });
+  //     }
+  // });
+
+    // axios.post('http://172.18.8.96:8585/feed/', JSON.stringify(data), {
+    //   headers: {
+    //     'Accept': 'application/json',
+    //     'Content-Type': 'application/json'
+    //   }
+    // })
+    // .then(response => {
+    //   console.log('Response:', response.data);
+    // })
+    // .catch(error => {
+    //   console.error('Error:', error);
+    // });
+    
 
 //   console.log(await getData.getLast(1738627200));
 })();
