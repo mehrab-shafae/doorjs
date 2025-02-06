@@ -194,18 +194,6 @@ export default function (authHeadersGlassnode: string) {
   }
 
   (async () => {
-    // let solData, dogeData; // objects finally
-    // const nodes = [{node: "SOL", saveTo: solData}, {node: "DOGE", saveTo: dogeData}];
-    // nodes.forEach(node => {
-    //   console.log("node: ", node)
-    //   node.forEach(dot => {
-    //     console.log("dot: ", dot)
-    //   });
-    //   // const getData = new GetDataGlassnode(node, authHeadersGlassnode);
-    //   // console.log(await getData.getAll());
-    //   // const data = await getData.getAll();
-    // });
-
     let solData: string, dogeData: string; // objects finally
 
     async function processNodes(nodes: any) {
@@ -221,16 +209,6 @@ export default function (authHeadersGlassnode: string) {
 
       await Promise.all(promises);
     }
-
-    // nodes.forEach(async ({ node, saveTo }) => {
-    //   console.log(node);
-    //   const getData = new GetDataGlassnode("SOL", authHeadersGlassnode);
-    //   // console.log(await getData.getAll());
-    //   const data = await getData.getAll();
-
-    //   eval(`${saveTo} = JSON.stringify(data)`);
-
-    // });
 
     const nodes = [
       { node: "SOL", saveTo: "solData" },
