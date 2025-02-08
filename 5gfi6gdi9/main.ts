@@ -20,46 +20,6 @@ let retryCount = 0;
 let retryCountL1 = 0;
 const MAX_RETRIES_L1 = 6;
 
-function killWarpPlus(callback: () => void): void {
-  exec("pkill -f warp-plus", (error) => {
-    if (error) {
-      console.log(`[Error] killing warp-plus: ${error.message}`);
-    }
-    callback();
-  });
-}
-
-function startWarpPlus(
-  port: number,
-  callback: (childProcess: ChildProcess) => void
-): void {
-  const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
-  const childProcess = exec(command);
-
-  childProcess.stdout?.on("data", (data: string) => {
-    console.log(data);
-    if (data.includes("connection test successful")) {
-      console.log(`warp-plus is running on port ${port}`);
-      callback(childProcess);
-    }
-  });
-
-  childProcess.stderr?.on("data", (data: string) => {
-    console.log(`[error] stderr: ${data}`);
-  });
-
-  childProcess.on("exit", (code: number) => {
-    console.log(`warp-plus exited with code ${code}`);
-  });
-}
-
-function stopWarpPlus(childProcess: ChildProcess | null): void {
-  if (childProcess) {
-    childProcess.kill();
-    console.log("warp-plus stopped");
-  }
-}
-
 /**
  * 2 layers
  * and 3 part on the one layer
@@ -423,6 +383,46 @@ new (class extends Core {
 
     const run = () => {
       const pur = () => {
+        function killWarpPlus(callback: () => void): void {
+          exec("pkill -f warp-plus", (error) => {
+            if (error) {
+              console.log(`[Error] killing warp-plus: ${error.message}`);
+            }
+            callback();
+          });
+        }
+
+        function startWarpPlus(
+          port: number,
+          callback: (childProcess: ChildProcess) => void
+        ): void {
+          const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
+          const childProcess = exec(command);
+
+          childProcess.stdout?.on("data", (data: string) => {
+            console.log(data);
+            if (data.includes("connection test successful")) {
+              console.log(`warp-plus is running on port ${port}`);
+              callback(childProcess);
+            }
+          });
+
+          childProcess.stderr?.on("data", (data: string) => {
+            console.log(`[error] stderr: ${data}`);
+          });
+
+          childProcess.on("exit", (code: number) => {
+            console.log(`warp-plus exited with code ${code}`);
+          });
+        }
+
+        function stopWarpPlus(childProcess: ChildProcess | null): void {
+          if (childProcess) {
+            childProcess.kill();
+            console.log("warp-plus stopped");
+          }
+        }
+
         killWarpPlus(() => {
           startWarpPlus(1235, (childProcess) => {
             setTimeout(() => {
