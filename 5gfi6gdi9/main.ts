@@ -8,6 +8,12 @@ import moment from "moment-timezone";
 import fs from "fs";
 import axios from "axios";
 
+/**
+ * 2 layers
+ * and 3 part on the one layer
+ * 
+ * 3 try and restart the ip
+ */
 new (class extends Core {
   Main() {
     const app = async () => {
