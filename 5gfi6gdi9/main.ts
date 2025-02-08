@@ -5,8 +5,7 @@ import puppeteer from "puppeteer";
 import cron from "node-cron";
 import moment from "moment-timezone";
 
-import fs, { existsSync, mkdirSync } from "fs";
-import { join } from "path";
+import fs from "fs";
 import axios from "axios";
 
 new (class extends Core {
