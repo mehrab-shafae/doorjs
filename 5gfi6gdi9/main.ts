@@ -12,6 +12,8 @@ import axios from "axios";
 
 import { exec, ChildProcess } from "child_process";
 
+import * as net from "net";
+
 let isRunning = false;
 
 const MAX_RETRIES = 5;
@@ -464,27 +466,49 @@ new (class extends Core {
           }
         }
 
-        killWarpPlus(() => {
-          startWarpPlus(1235, (childProcess) => {
-            setTimeout(() => {
-              stopWarpPlus(childProcess);
-              startWarpPlus(1234, (_childProcess) => {
-                try {
-                  app(); // اجرای تابع اصلی
-                } catch (error) {
-                  console.log(`Error in main: ${(error as Error).message}`);
-                  retryCount++;
-                  if (retryCount < MAX_RETRIES) {
-                    console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
-                    pur(); // try again ..
-                  } else {
-                    console.log("[error] Max retries reached. Exiting...");
-                    process.exit(1); // خروج با خطا
-                  }
-                }
-              });
-            }, 3000); // زمان انتظار برای اطمینان از اینکه warp-plus آماده است
+        function findOpenPort(): Promise<number> {
+          return new Promise((resolve, reject) => {
+            const port = Math.floor(Math.random() * 65535) + 1;
+            const server = net.createServer();
+
+            server.listen(port, () => {
+              server.close(() => resolve(port));
+            });
+
+            server.on("error", () => {
+              findOpenPort().then(resolve).catch(reject);
+            });
           });
+        }
+
+        killWarpPlus(() => {
+          findOpenPort()
+            .then((port) => {
+              console.log(`warp on: ${port}`);
+              startWarpPlus(port, (childProcess) => {
+                setTimeout(() => {
+                  // stopWarpPlus(childProcess);
+                  // startWarpPlus(1234, (_childProcess) => {
+                  try {
+                    app(); // اجرای تابع اصلی
+                  } catch (error) {
+                    console.log(`Error in main: ${(error as Error).message}`);
+                    retryCount++;
+                    if (retryCount < MAX_RETRIES) {
+                      console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+                      pur(); // try again ..
+                    } else {
+                      console.log("[error] Max retries reached. Exiting...");
+                      process.exit(1); // خروج با خطا
+                    }
+                  }
+                  // });
+                }, 3000); // زمان انتظار برای اطمینان از اینکه warp-plus آماده است
+              });
+            })
+            .catch((err) => {
+              console.error("خطا در پیدا کردن پورت:", err);
+            });
         });
       };
       let timeSc = this.config.Args.fast ? "*/5 * * * *" : "30 1 * * *"; // 1:30 PM
