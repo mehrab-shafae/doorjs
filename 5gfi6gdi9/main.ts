@@ -375,9 +375,9 @@ new (class extends Core {
               }
             };
 
-            async function processNodes(
+            const processNodes = async (
               nodes: Array<{ node: string; saveTo: string }>
-            ) {
+            ) => {
               const promises = nodes.map(async ({ node, saveTo }) => {
                 try {
                   console.log(node);
@@ -394,7 +394,8 @@ new (class extends Core {
                   eval(`${saveTo} = JSON.stringify(data)`);
 
                   console.log("send data to api");
-                  // await sendDataToApi(data);
+                  if(!this.config.Args.fast) await sendDataToApi(data);
+                  isRunning = false;
                 } catch (error) {
                   console.error("Error occurred:", error);
                 }
@@ -489,8 +490,11 @@ new (class extends Core {
           });
         });
       };
+      let timeSc = this.config.Args.fast
+            ? "*/5 * * * *"
+            : "30 1 * * *"; // 1:30 PM
       cron.schedule(
-        "*/5 * * * *", // 1:30 PM // 30 1
+        timeSc,
         () => {
           if (isRunning) {
             console.log(
@@ -500,7 +504,6 @@ new (class extends Core {
           }
 
           isRunning = true;
-          // isRunning = false;
 
           const timeInUTC = moment().utc().format("YYYY-MM-DD HH:mm:ss");
           console.log(
