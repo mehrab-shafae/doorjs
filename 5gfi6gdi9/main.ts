@@ -8,10 +8,57 @@ import moment from "moment-timezone";
 import fs from "fs";
 import axios from "axios";
 
+import { exec, ChildProcess } from "child_process";
+
+let isRunning = false;
+
+const MAX_RETRIES = 5;
+let retryCount = 0;
+
+function killWarpPlus(callback: () => void): void {
+  exec("pkill -f warp-plus", (error) => {
+    if (error) {
+      console.log(`[Error] killing warp-plus: ${error.message}`);
+    }
+    callback();
+  });
+}
+
+function startWarpPlus(
+  port: number,
+  callback: (childProcess: ChildProcess) => void
+): void {
+  const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
+  const childProcess = exec(command);
+
+  childProcess.stdout?.on("data", (data: string) => {
+    console.log(data);
+    if (data.includes("connection test successful")) {
+      console.log(`warp-plus is running on port ${port}`);
+      callback(childProcess);
+    }
+  });
+
+  childProcess.stderr?.on("data", (data: string) => {
+    console.log(`[error] stderr: ${data}`);
+  });
+
+  childProcess.on("exit", (code: number) => {
+    console.log(`warp-plus exited with code ${code}`);
+  });
+}
+
+function stopWarpPlus(childProcess: ChildProcess | null): void {
+  if (childProcess) {
+    childProcess.kill();
+    console.log("warp-plus stopped");
+  }
+}
+
 /**
  * 2 layers
  * and 3 part on the one layer
- * 
+ *
  * 3 try and restart the ip
  */
 new (class extends Core {
@@ -359,17 +406,49 @@ new (class extends Core {
       })(cookieString);
     };
 
-    if (this.config.Args.test) {
-      void app();
-    } else {
+    const run = () => {
+      const pur = () => {
+        killWarpPlus(() => {
+          startWarpPlus(1235, (childProcess) => {
+            setTimeout(() => {
+              stopWarpPlus(childProcess);
+              startWarpPlus(1234, (childProcess) => {
+                try {
+                  app(); // اجرای تابع اصلی
+                } catch (error) {
+                  console.log(`Error in main: ${(error as Error).message}`);
+                  retryCount++;
+                  if (retryCount < MAX_RETRIES) {
+                    console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+                    pur(); // دوباره تلاش می‌کنیم
+                  } else {
+                    console.log("[error] Max retries reached. Exiting...");
+                    process.exit(1); // خروج با خطا
+                  }
+                }
+              });
+            }, 3000); // زمان انتظار برای اطمینان از اینکه warp-plus آماده است
+          });
+        });
+      };
       cron.schedule(
-        "30 1 * * *", // 1:30 PM
+        "*/5 * * * *", // 1:30 PM // 30 1
         () => {
+          if (isRunning) {
+            console.log(
+              "Previous instance is still running. Skipping this execution."
+            );
+            return; // اگر در حال اجرا است، از اجرای دوباره جلوگیری می‌کنیم
+          }
+
+          isRunning = true;
+          // isRunning = false;
+
           const timeInUTC = moment().utc().format("YYYY-MM-DD HH:mm:ss");
           console.log(
             `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
           );
-          void app();
+          pur();
         },
         {
           scheduled: true,
@@ -377,6 +456,14 @@ new (class extends Core {
         }
       );
       console.log("[info] ~{5}`Cron job scheduled. It will run every night.`");
-    }
+    };
+
+    (() => {
+      if (this.config.Args.test) {
+        void app();
+      } else {
+        run();
+      }
+    })();
   }
 })();
