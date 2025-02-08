@@ -79,7 +79,6 @@ new (class extends Core {
             : { args: ["--proxy-server=" + this.config.EnvConfig.proxy] }),
         });
 
-        // await (async (browser) => {
         console.log("Puppeteer is starting...");
         const page = await browser.newPage();
 
@@ -171,9 +170,6 @@ new (class extends Core {
           .join(";");
         console.log(cookieString);
 
-        // await browser.close();
-
-        // (async (authHeadersGlassnode: string) => {
         function convertTimestampToISO(timestampInt: number) {
           return moment
             .unix(timestampInt)
@@ -343,7 +339,6 @@ new (class extends Core {
           }
         }
 
-        // (async () => {
         let solData: string, dogeData: string; // objects finally
 
         const sendDataToApi = async (data: any) => {
@@ -373,6 +368,7 @@ new (class extends Core {
               console.log(node);
               const getData = new GetDataGlassnode(node, cookieString);
               const data = await getData.getAll();
+              // console.log(await getData.getLast(1738627200));
 
               if (!data) {
                 throw new Error("data is null!");
@@ -399,8 +395,7 @@ new (class extends Core {
         processNodes(nodes)
           .then(() => {
             console.log("All nodes processed");
-            // @ts-ignore
-            fs.writeFile("data-sol.json", solData, (err) => {
+            fs.writeFile("data-sol.json", solData!, (err) => {
               if (err) {
                 console.error(err);
               } else {
@@ -408,8 +403,7 @@ new (class extends Core {
               }
             });
 
-            // @ts-ignore
-            fs.writeFile("data-doge.json", dogeData, (err) => {
+            fs.writeFile("data-doge.json", dogeData!, (err) => {
               if (err) {
                 console.error(err);
               } else {
@@ -420,31 +414,6 @@ new (class extends Core {
           .catch((error) => {
             console.error("Error processing nodes:", error);
           });
-
-        //   fs.readFile('data.json', 'utf8', (err, fileData) => {
-        //     if (err) {
-        //         console.error(err);
-        //     } else {
-        //         // console.log('Read data:', fileData);
-        //         axios.post('http://172.18.8.96:8585/feed/', fileData, {
-        //           headers: {
-        //             'Accept': 'application/json',
-        //             'Content-Type': 'application/json'
-        //           }
-        //         })
-        //         .then(response => {
-        //           console.log('Response:', response.data);
-        //         })
-        //         .catch(error => {
-        //           console.error('Error:', error);
-        //         });
-        //     }
-        // });
-
-        //   console.log(await getData.getLast(1738627200));
-        // })();
-        // })(cookieString);
-        // })(browser);
       } finally {
         try {
           await browser!.close();
