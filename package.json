@@ -1,6 +1,6 @@
 {
   "name": "doorjs",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "license": "UNLICENSED",
   "author": "MRB",
@@ -16,14 +16,12 @@
     "moment-timezone": "^0.5.47",
     "node-cron": "^3.0.3",
     "puppeteer": "^24.1.1",
-    "puppeteer-core": "^24.1.1",
-    "winston": "^3.17.0"
+    "puppeteer-core": "^24.1.1"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",
-    "@types/request": "^2.48.12",
-    "typescript": "^5.7.2"
+    "@types/request": "^2.48.12"
   }
 }
