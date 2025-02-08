@@ -62,7 +62,7 @@ new (class extends Core {
           retryCountL1++;
           if (retryCountL1 < MAX_RETRIES_L1) {
             console.log(`Retrying... (${retryCountL1}/${MAX_RETRIES_L1})`);
-            app(); // دوباره تلاش می‌کنیم
+            app(); // try again ..
             return;
           } else {
             console.log("[L1] Max retries reached. Restarting...");
@@ -87,7 +87,7 @@ new (class extends Core {
           retryCountL1++;
           if (retryCountL1 < MAX_RETRIES_L1) {
             console.log(`Retrying... (${retryCountL1}/${MAX_RETRIES_L1})`);
-            app(); // دوباره تلاش می‌کنیم
+            app(); // try again ..
             return;
           } else {
             console.log("[L1] Max retries reached. Restarting...");
@@ -117,7 +117,7 @@ new (class extends Core {
           retryCountL1++;
           if (retryCountL1 < MAX_RETRIES_L1) {
             console.log(`Retrying... (${retryCountL1}/${MAX_RETRIES_L1})`);
-            app(); // دوباره تلاش می‌کنیم
+            app(); // try again ..
             return;
           } else {
             console.log("[L1] Max retries reached. Restarting...");
@@ -138,7 +138,6 @@ new (class extends Core {
             .replace("+00:00", "Z");
         }
 
-        // Constants
         const ENDPOINT_GLASSNODE_TX =
           "https://api.glassnode.com/v1/metrics/transactions/count";
         const ENDPOINT_GLASSNODE_FEE =
@@ -299,7 +298,7 @@ new (class extends Core {
           }
         }
 
-        let solData: string, dogeData: string; // objects finally
+        let solData: string, dogeData: string;
 
         const sendDataToApi = async (data: any) => {
           try {
@@ -427,7 +426,7 @@ new (class extends Core {
           startWarpPlus(1235, (childProcess) => {
             setTimeout(() => {
               stopWarpPlus(childProcess);
-              startWarpPlus(1234, (childProcess) => {
+              startWarpPlus(1234, (_childProcess) => {
                 try {
                   app(); // اجرای تابع اصلی
                 } catch (error) {
@@ -435,7 +434,7 @@ new (class extends Core {
                   retryCount++;
                   if (retryCount < MAX_RETRIES) {
                     console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
-                    pur(); // دوباره تلاش می‌کنیم
+                    pur(); // try again ..
                   } else {
                     console.log("[error] Max retries reached. Exiting...");
                     process.exit(1); // خروج با خطا
