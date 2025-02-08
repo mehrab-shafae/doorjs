@@ -521,7 +521,7 @@ new (class extends Core {
             });
         });
       };
-      let timeSc = this.config.Args.fast ? "*/5 * * * *" : "30 1 * * *"; // 1:30 PM
+      let timeSc = this.config.Args.fast ? "*/1 * * * *" : "30 1 * * *"; // 1:30 PM
       cron.schedule(
         timeSc,
         () => {
