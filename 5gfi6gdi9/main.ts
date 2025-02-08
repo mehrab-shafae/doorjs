@@ -343,106 +343,106 @@ new (class extends Core {
           }
         }
 
-        (async () => {
-          let solData: string, dogeData: string; // objects finally
+        // (async () => {
+        let solData: string, dogeData: string; // objects finally
 
-          const sendDataToApi = async (data: any) => {
+        const sendDataToApi = async (data: any) => {
+          try {
+            const res = await axios.post(
+              this.config.EnvConfig.databasep + "/feed/",
+              JSON.stringify(data),
+              {
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+            console.log("Response:", res.status);
+          } catch (error) {
+            console.error("Axios error!");
+            throw error;
+          }
+        };
+
+        const processNodes = async (
+          nodes: Array<{ node: string; saveTo: string }>
+        ) => {
+          const promises = nodes.map(async ({ node, saveTo }) => {
             try {
-              const res = await axios.post(
-                this.config.EnvConfig.databasep + "/feed/",
-                JSON.stringify(data),
-                {
-                  headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                  },
-                }
-              );
-              console.log("Response:", res.status);
+              console.log(node);
+              const getData = new GetDataGlassnode(node, cookieString);
+              const data = await getData.getAll();
+
+              if (!data) {
+                throw new Error("data is null!");
+              }
+
+              eval(`${saveTo} = JSON.stringify(data)`);
+
+              console.log("send data to api");
+              if (!this.config.Args.fast) await sendDataToApi(data);
+              isRunning = false;
             } catch (error) {
-              console.error("Axios error!");
-              throw error;
+              console.error("Error occurred:", error);
             }
-          };
+          });
 
-          const processNodes = async (
-            nodes: Array<{ node: string; saveTo: string }>
-          ) => {
-            const promises = nodes.map(async ({ node, saveTo }) => {
-              try {
-                console.log(node);
-                const getData = new GetDataGlassnode(node, cookieString);
-                const data = await getData.getAll();
+          await Promise.all(promises);
+        };
 
-                if (!data) {
-                  throw new Error("data is null!");
-                }
+        const nodes = [
+          { node: "SOL", saveTo: "solData" },
+          { node: "DOGE", saveTo: "dogeData" },
+        ];
 
-                eval(`${saveTo} = JSON.stringify(data)`);
-
-                console.log("send data to api");
-                if (!this.config.Args.fast) await sendDataToApi(data);
-                isRunning = false;
-              } catch (error) {
-                console.error("Error occurred:", error);
+        processNodes(nodes)
+          .then(() => {
+            console.log("All nodes processed");
+            // @ts-ignore
+            fs.writeFile("data-sol.json", solData, (err) => {
+              if (err) {
+                console.error(err);
+              } else {
+                console.log("saved");
               }
             });
 
-            await Promise.all(promises);
-          };
-
-          const nodes = [
-            { node: "SOL", saveTo: "solData" },
-            { node: "DOGE", saveTo: "dogeData" },
-          ];
-
-          processNodes(nodes)
-            .then(() => {
-              console.log("All nodes processed");
-              // @ts-ignore
-              fs.writeFile("data-sol.json", solData, (err) => {
-                if (err) {
-                  console.error(err);
-                } else {
-                  console.log("saved");
-                }
-              });
-
-              // @ts-ignore
-              fs.writeFile("data-doge.json", dogeData, (err) => {
-                if (err) {
-                  console.error(err);
-                } else {
-                  console.log("saved");
-                }
-              });
-            })
-            .catch((error) => {
-              console.error("Error processing nodes:", error);
+            // @ts-ignore
+            fs.writeFile("data-doge.json", dogeData, (err) => {
+              if (err) {
+                console.error(err);
+              } else {
+                console.log("saved");
+              }
             });
+          })
+          .catch((error) => {
+            console.error("Error processing nodes:", error);
+          });
 
-          //   fs.readFile('data.json', 'utf8', (err, fileData) => {
-          //     if (err) {
-          //         console.error(err);
-          //     } else {
-          //         // console.log('Read data:', fileData);
-          //         axios.post('http://172.18.8.96:8585/feed/', fileData, {
-          //           headers: {
-          //             'Accept': 'application/json',
-          //             'Content-Type': 'application/json'
-          //           }
-          //         })
-          //         .then(response => {
-          //           console.log('Response:', response.data);
-          //         })
-          //         .catch(error => {
-          //           console.error('Error:', error);
-          //         });
-          //     }
-          // });
+        //   fs.readFile('data.json', 'utf8', (err, fileData) => {
+        //     if (err) {
+        //         console.error(err);
+        //     } else {
+        //         // console.log('Read data:', fileData);
+        //         axios.post('http://172.18.8.96:8585/feed/', fileData, {
+        //           headers: {
+        //             'Accept': 'application/json',
+        //             'Content-Type': 'application/json'
+        //           }
+        //         })
+        //         .then(response => {
+        //           console.log('Response:', response.data);
+        //         })
+        //         .catch(error => {
+        //           console.error('Error:', error);
+        //         });
+        //     }
+        // });
 
-          //   console.log(await getData.getLast(1738627200));
-        })();
+        //   console.log(await getData.getLast(1738627200));
+        // })();
         // })(cookieString);
         // })(browser);
       } finally {
