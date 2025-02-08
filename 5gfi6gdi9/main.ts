@@ -12,20 +12,11 @@ new (class extends Core {
   Main() {
     const app = () => {
       (async () => {
-        let browser;
-
-        if (this.config.Args.test) {
-          browser = await puppeteer.launch({
-            headless: true,
-            executablePath: this.config.EnvConfig.chrome,
-          });
-        } else {
-          browser = await puppeteer.launch({
-            headless: true,
-            executablePath: this.config.EnvConfig.chrome,
-            args: ["--proxy-server=" + this.config.EnvConfig.proxy],
-          });
-        }
+        const browser = await puppeteer.launch({
+          headless: true,
+          executablePath: this.config.EnvConfig.chrome,
+          ...(this.config.Args.test ? {} : { args: ["--proxy-server=" + this.config.EnvConfig.proxy] }),
+        });        
 
         {
           const page = await browser.newPage();
