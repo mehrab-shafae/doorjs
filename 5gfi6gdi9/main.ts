@@ -15,6 +15,9 @@ let isRunning = false;
 const MAX_RETRIES = 5;
 let retryCount = 0;
 
+let retryCountL1 = 0;
+const MAX_RETRIES_L1 = 3;
+
 function killWarpPlus(callback: () => void): void {
   exec("pkill -f warp-plus", (error) => {
     if (error) {
@@ -82,7 +85,7 @@ new (class extends Core {
         waitUntil: "networkidle0",
         timeout: this.config.EnvConfig.timeout,
       });
-      await page.reload(); // we need clear cache like F5
+      await page.reload(); // we need clear cache like ctrl+F5
 
       await new Promise((resolve) => setTimeout(resolve, 8000));
 
