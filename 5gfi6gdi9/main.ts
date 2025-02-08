@@ -481,7 +481,7 @@ new (class extends Core {
           });
         }
 
-        killWarpPlus(() => {
+        // killWarpPlus(() => {
           findOpenPort()
             .then((port) => {
               console.log(`warp on: ${port}`);
@@ -509,7 +509,7 @@ new (class extends Core {
             .catch((err) => {
               console.error("خطا در پیدا کردن پورت:", err);
             });
-        });
+        // });
       };
       let timeSc = this.config.Args.fast ? "*/5 * * * *" : "30 1 * * *"; // 1:30 PM
       cron.schedule(
