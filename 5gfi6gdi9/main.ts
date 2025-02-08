@@ -1,4 +1,6 @@
 // on the core ;)
+// by S-MRB-S
+
 import { Core } from "@marboris/core";
 import puppeteer from "puppeteer";
 
