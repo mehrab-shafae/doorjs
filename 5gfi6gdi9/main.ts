@@ -15,6 +15,7 @@ import { exec, ChildProcess } from "child_process";
 import * as net from "net";
 
 let isRunning = false;
+let isWarpRunning = false;
 
 const MAX_RETRIES = 5;
 let retryCount = 0;
@@ -442,7 +443,8 @@ new (class extends Core {
             childProcess = exec(command);
 
             childProcess.stdout?.on("data", (data: string) => {
-                if (data.includes("connection test successful")) {
+                if (data.includes("connection test successful") && !isWarpRunning) {
+                    isWarpRunning = true;
                     console.log(`warp-plus is running on port ${port}`);
                     callback(childProcess!);
                 }
