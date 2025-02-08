@@ -435,27 +435,37 @@ new (class extends Core {
           });
         }
 
-        function startWarpPlus(
-          port: number,
-          callback: (childProcess: ChildProcess) => void
-        ): void {
-          const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
-          const childProcess = exec(command);
+        let childProcess: ChildProcess | null = null;
 
-          childProcess.stdout?.on("data", (data: string) => {
-            console.log(data);
-            if (data.includes("connection test successful")) {
-              console.log(`warp-plus is running on port ${port}`);
-              callback(childProcess);
-            }
-          });
+        function startWarpPlus(port: number, callback: (childProcess: ChildProcess) => void): void {
+            const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
+            childProcess = exec(command);
 
-          childProcess.stderr?.on("data", (data: string) => {
-            console.log(`[error] stderr: ${data}`);
-          });
+            childProcess.stdout?.on("data", (data: string) => {
+                if (data.includes("connection test successful")) {
+                    console.log(`warp-plus is running on port ${port}`);
+                    callback(childProcess!);
+                }
+            });
 
-          childProcess.on("exit", (code: number) => {
-            console.log(`warp-plus exited with code ${code}`);
+            childProcess.stderr?.on("data", (data: string) => {
+                // می‌توانید اینجا خطاها را مدیریت کنید
+                // در حال حاضر فقط خطاها را نادیده می‌گیریم
+            });
+
+            childProcess.on("exit", (code: number) => {
+                console.error(`warp-plus exited with code ${code}`);
+                if (code !== 0) {
+                    console.error('Error: warp-plus terminated unexpectedly.');
+                    // می‌توانید اینجا یک خطا برگردانید یا مدیریت کنید
+                }
+            });
+
+            process.on('exit', () => {
+              if (childProcess) {
+                  childProcess.kill(); // متوقف کردن warp-plus
+                  console.log('warp-plus has been stopped.');
+              }
           });
         }
 
