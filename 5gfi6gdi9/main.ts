@@ -310,6 +310,7 @@ new (class extends Core {
                   Accept: "application/json",
                   "Content-Type": "application/json",
                 },
+                timeout: 5000,
               }
             );
             console.log("Response:", res.status);
@@ -322,25 +323,70 @@ new (class extends Core {
         const processNodes = async (
           nodes: Array<{ node: string; saveTo: string }>
         ) => {
-          const promises = nodes.map(async ({ node, saveTo }) => {
-            try {
-              console.log(node);
-              const getData = new GetDataGlassnode(node, cookieString);
-              const data = await getData.getAll();
-              // console.log(await getData.getLast(1738627200));
+          let dogeTimestamp = null;
+          let solTimestamp = null;
 
-              if (!data) {
-                throw new Error("data is null!");
-              }
-
-              eval(`${saveTo} = JSON.stringify(data)`);
-
-              console.log("send data to api");
-              if (!this.config.Args.fast) await sendDataToApi(data);
-              isRunning = false;
-            } catch (error) {
-              console.error("Error occurred:", error);
+          const response = await axios.get(
+            this.config.EnvConfig.databasep +
+              "/feed/all_symbols/last_timestamps",
+            {
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              timeout: 5000,
             }
+          );
+
+          if (response.data.status === "success") {
+            const data = response.data.data;
+            dogeTimestamp = data.DOGE || null;
+            solTimestamp = data.SOL || null;
+          } else {
+            throw new Error("Error fetching data from API");
+          }
+
+          const promises = nodes.map(async ({ node, saveTo }) => {
+            console.log("on:", node);
+            const getData = new GetDataGlassnode(node, cookieString);
+
+            let timeStamp;
+
+            switch (node) {
+              case "SOL":
+                if (!solTimestamp) return;
+                timeStamp = Math.floor(new Date(solTimestamp).getTime() / 1000);
+
+                console.log(`SOL Timestamp: ${timeStamp}`);
+                break;
+
+              case "DOGE":
+                if (!dogeTimestamp) return;
+                timeStamp = Math.floor(
+                  new Date(dogeTimestamp).getTime() / 1000
+                );
+
+                console.log(`DOGE Timestamp: ${timeStamp}`);
+
+                break;
+            }
+
+            let data;
+            if (timeStamp) {
+              data = await getData.getLast(timeStamp);
+            } else {
+              data = await getData.getAll();
+            }
+
+            if (!data) {
+              throw new Error("data is null!");
+            }
+
+            eval(`${saveTo} = JSON.stringify(data)`);
+
+            console.log("send data to api");
+            if (!this.config.Args.fast) await sendDataToApi(data);
+            isRunning = false;
           });
 
           await Promise.all(promises);
@@ -351,28 +397,24 @@ new (class extends Core {
           { node: "DOGE", saveTo: "dogeData" },
         ];
 
-        processNodes(nodes)
-          .then(() => {
-            console.log("All nodes processed");
-            fs.writeFile("data-sol.json", solData!, (err) => {
-              if (err) {
-                console.error(err);
-              } else {
-                console.log("saved");
-              }
-            });
-
-            fs.writeFile("data-doge.json", dogeData!, (err) => {
-              if (err) {
-                console.error(err);
-              } else {
-                console.log("saved");
-              }
-            });
-          })
-          .catch((error) => {
-            console.error("Error processing nodes:", error);
+        processNodes(nodes).then(() => {
+          console.log("All nodes processed");
+          fs.writeFile("data-sol.json", solData!, (err) => {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log("saved");
+            }
           });
+
+          fs.writeFile("data-doge.json", dogeData!, (err) => {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log("saved");
+            }
+          });
+        });
       } finally {
         try {
           await browser!.close();
