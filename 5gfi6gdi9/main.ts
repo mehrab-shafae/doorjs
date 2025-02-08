@@ -97,10 +97,6 @@ new (class extends Core {
         await new Promise((resolve) => setTimeout(resolve, 8000));
 
         try {
-          await page.screenshot({ path: "1.png" });
-        } catch (_) {}
-
-        try {
           await page.click('button[data-cy="login-btn"]');
         } catch (error) {
           console.log(`Error in L1: ${(error as Error).message}`);
@@ -117,10 +113,6 @@ new (class extends Core {
 
         console.log("Login button founded ! we sleep 8s more..");
         await new Promise((resolve) => setTimeout(resolve, 8000));
-
-        try {
-          await page.screenshot({ path: "2.png" });
-        } catch (_) {}
 
         try {
           await page.type('input[name="email"]', this.config.EnvConfig.email);
@@ -146,10 +138,6 @@ new (class extends Core {
 
         console.log("We login :D ! We 20s waiting for cookies.");
         await new Promise((resolve) => setTimeout(resolve, 20000));
-
-        try {
-          await page.screenshot({ path: "3.png" });
-        } catch (_) {}
 
         const cookies = await page.cookies();
 
