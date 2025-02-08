@@ -1,0 +1,12 @@
+Build:
+    npm i -g yarn typescript && yarn && tsc
+
+Test on local:
+    node . --debug --test
+
+Test on server:
+    node . --debug --fast
+
+Prod:
+    node . --debug
+
