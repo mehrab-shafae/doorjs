@@ -31,7 +31,9 @@ const MAX_RETRIES_L1 = 6;
  */
 new (class extends Core {
   Main() {
-    const app = async () => {
+    let cachePort: number | undefined;
+    const app = async (warpPort?: number) => {
+      if(!cachePort) cachePort = warpPort || undefined;
       let browser;
       try {
         browser = await puppeteer.launch({
@@ -39,7 +41,7 @@ new (class extends Core {
           executablePath: this.config.EnvConfig.chrome,
           ...(this.config.Args.test
             ? {}
-            : { args: ["--proxy-server=" + this.config.EnvConfig.proxy] }),
+            : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
         });
 
         console.log("Puppeteer is starting...");
@@ -502,7 +504,7 @@ new (class extends Core {
                   // stopWarpPlus(childProcess);
                   // startWarpPlus(1234, (_childProcess) => {
                   try {
-                    app(); // اجرای تابع اصلی
+                    app(port); // اجرای تابع اصلی
                   } catch (error) {
                     console.log(`Error in main: ${(error as Error).message}`);
                     retryCount++;
