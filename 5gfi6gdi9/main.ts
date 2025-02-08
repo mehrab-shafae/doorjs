@@ -105,7 +105,6 @@ new (class extends Core {
           }
 
           // Constants
-          const LEVEL_LOGGING = "info";
           const ENDPOINT_GLASSNODE_TX =
             "https://api.glassnode.com/v1/metrics/transactions/count";
           const ENDPOINT_GLASSNODE_FEE =
@@ -116,12 +115,6 @@ new (class extends Core {
             "sec-ch-ua":
               '"Not A(Brand";v="8", "Chromium";v="132", "Microsoft Edge";v="132"',
           };
-
-          // Configure logger
-          const logsDir = join(process.cwd(), "logs");
-          if (!existsSync(logsDir)) {
-            mkdirSync(logsDir, { recursive: true });
-          }
 
           class GetDataGlassnode {
             symbol: string;
@@ -275,10 +268,10 @@ new (class extends Core {
           (async () => {
             let solData: string, dogeData: string; // objects finally
 
-            async function sendDataToApi(data: any) {
+            const sendDataToApi = async (data: any) => {
               try {
                 const res = await axios.post(
-                  "http://91.107.149.166:6565/feed/",
+                  this.config.EnvConfig.databasep + "/feed/",
                   JSON.stringify(data),
                   {
                     headers: {
