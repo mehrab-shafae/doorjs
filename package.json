@@ -7,7 +7,8 @@
   "type": "module",
   "main": "dist/main.js",
   "scripts": {
-    "start": "tsc && node . --debug"
+    "start": "tsc && node . --debug",
+    "build": "tsc"
   },
   "dependencies": {
     "@marboris/core": "^2.12.1",
@@ -22,6 +23,7 @@
     "@types/node": "^22.10.2",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",
-    "@types/request": "^2.48.12"
+    "@types/request": "^2.48.12",
+    "typescript": "^5.7.3"
   }
 }
