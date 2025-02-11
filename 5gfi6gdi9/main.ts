@@ -504,8 +504,8 @@ new (class extends Core {
                       console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
                       pur(); // try again ..
                     } else {
-                      console.log("[error] Max retries reached. Exiting...");
-                      process.exit(1);
+                      console.log("[error] Max retries reached. Aborting... :(");
+                      // process.exit(1);
                     }
                   }
                 }, 3000);
