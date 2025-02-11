@@ -23,12 +23,6 @@ let retryCount = 0;
 let retryCountL1 = 0;
 const MAX_RETRIES_L1 = 6;
 
-/**
- * 2 layers
- * and 3 part on the one layer
- *
- * 3 try and restart the ip
- */
 new (class extends Core {
   Main() {
     let cachePort: number | undefined;
@@ -501,8 +495,6 @@ new (class extends Core {
               console.log(`warp on: ${port}`);
               startWarpPlus(port, (childProcess) => {
                 setTimeout(() => {
-                  // stopWarpPlus(childProcess);
-                  // startWarpPlus(1234, (_childProcess) => {
                   try {
                     app(port); // اجرای تابع اصلی
                   } catch (error) {
@@ -513,11 +505,10 @@ new (class extends Core {
                       pur(); // try again ..
                     } else {
                       console.log("[error] Max retries reached. Exiting...");
-                      process.exit(1); // خروج با خطا
+                      process.exit(1);
                     }
                   }
-                  // });
-                }, 3000); // زمان انتظار برای اطمینان از اینکه warp-plus آماده است
+                }, 3000);
               });
             })
             .catch((err) => {

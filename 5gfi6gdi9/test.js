@@ -7,7 +7,7 @@ import CloudflareBypasser from './cf.js'; // فرض کنید کد قبلی در 
     const page = await browser.newPage();
 
     // آدرس وب‌سایت مورد نظر را وارد کنید
-    await page.goto('https://nearblocks.io/charts/txns'); // آدرس وب‌سایت که نیاز به دور زدن Cloudflare دارد
+    await page.goto('https://solscan.io/'); // آدرس وب‌سایت که نیاز به دور زدن Cloudflare دارد
 
     // ایجاد یک نمونه از CloudflareBypasser
     const bypasser = new CloudflareBypasser(page, 5, true); // 5 تلاش برای دور زدن و لاگ‌گذاری فعال
