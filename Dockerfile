@@ -66,4 +66,4 @@ COPY --chown=chromeuser:chromeuser . .
 
 RUN npm install --only=production
 
-CMD ["node", "dist/main.js", "--debug", "--test", "--fast"]
+CMD ["node", "dist/main.js", "--debug"]
