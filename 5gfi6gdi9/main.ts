@@ -516,7 +516,7 @@ new (class extends Core {
             });
         });
       };
-      let timeSc = this.config.Args.fast ? "*/1 * * * *" : "30 1 * * *"; // 1:30 PM
+      let timeSc = this.config.Args.fast ? "*/1 * * * *" : this.config.EnvConfig.CRONC;
       cron.schedule(
         timeSc,
         () => {
