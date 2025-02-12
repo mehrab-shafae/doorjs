@@ -60,6 +60,8 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/.env ./
 COPY --from=build /app/warp* ./
 
+RUN rm -f package-lock.json
+
 COPY --chown=chromeuser:chromeuser . .
 
 RUN npm install --only=production
