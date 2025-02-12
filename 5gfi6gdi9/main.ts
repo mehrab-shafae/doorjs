@@ -405,21 +405,21 @@ new (class extends Core {
 
         processNodes(nodes).then(() => {
           console.log("All nodes processed");
-          fs.writeFile("data-sol.json", solData!, (err) => {
-            if (err) {
-              console.error(err);
-            } else {
-              console.log("saved");
-            }
-          });
+          // fs.writeFile("data-sol.json", solData!, (err) => {
+          //   if (err) {
+          //     console.error(err);
+          //   } else {
+          //     console.log("saved");
+          //   }
+          // });
 
-          fs.writeFile("data-doge.json", dogeData!, (err) => {
-            if (err) {
-              console.error(err);
-            } else {
-              console.log("saved");
-            }
-          });
+          // fs.writeFile("data-doge.json", dogeData!, (err) => {
+          //   if (err) {
+          //     console.error(err);
+          //   } else {
+          //     console.log("saved");
+          //   }
+          // });
         });
       } finally {
         try {
