@@ -319,95 +319,88 @@ new (class extends Core {
           }
         };
 
+        interface MyClass {
+          [key: string]: any; // یا نوع خاصی که می‌خواهید
+        }
         const processNodes = async (
           nodes: Array<{ node: string; saveTo: string }>
         ) => {
           let dogeTimestamp = null;
           let solTimestamp = null;
-
-          try{
-          const response = await axios.get(
-            this.config.EnvConfig.databasep +
-              "/feed/all_symbols/last_timestamps",
-            {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              timeout: 5000,
-            }
-          );
-
-          if (response.status === 200) {
-            let data;
-              data = response.data.data || undefined;
+        
+          try {
+            const response = await axios.get(
+              this.config.EnvConfig.databasep +
+                "/feed/all_symbols/last_timestamps",
+              {
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                timeout: 5000,
+              }
+            );
+        
+            if (response.status === 200) {
+              let data = response.data.data || {};
               dogeTimestamp = data.DOGE || null;
               solTimestamp = data.SOL || null;
-          } else {
-            throw new Error("Error fetching data from API");
-          }
-
-        }catch(_){
-          dogeTimestamp = null;
-          solTimestamp = null;
-        }
-
-          const promises = nodes.map(async ({ node, saveTo }) => {
-            try{
-
-            
-            console.log("on:", node);
-            const getData = new GetDataGlassnode(node, cookieString);
-
-            let timeStamp;
-
-            switch (node) {
-              case "SOL":
-                if (!solTimestamp) return;
-                timeStamp = Math.floor(new Date(solTimestamp).getTime() / 1000);
-
-                console.log(`SOL Timestamp: ${timeStamp}`);
-                break;
-
-              case "DOGE":
-                if (!dogeTimestamp) return;
-                timeStamp = Math.floor(
-                  new Date(dogeTimestamp).getTime() / 1000
-                );
-
-                console.log(`DOGE Timestamp: ${timeStamp}`);
-
-                break;
-            }
-
-            console.log("We getted")
-            let data;
-            console.log("timeStamp: ", timeStamp)
-            if (timeStamp) {
-              data = await getData.getLast(timeStamp);
             } else {
-              data = await getData.getAll();
+              throw new Error("Error fetching data from API");
             }
-            console.log("data: ", data)
-
-            if (!data) {
-              throw new Error("data is null!");
-            }
-
-            eval(`${saveTo} = JSON.stringify(data)`);
-
-            console.log("send data to api");
-            if (!this.config.Args.fast) await sendDataToApi(data);
-            isRunning = false;
-            
-          }catch(error){
-            console.log("error in nodes: ", error)
+          } catch (_) {
+            dogeTimestamp = null;
+            solTimestamp = null;
           }
-
+        
+          const promises = nodes.map(async ({ node, saveTo }) => {
+            try {
+              console.log("on:", node);
+              const getData = new GetDataGlassnode(node, cookieString);
+        
+              let timeStamp = null; // تعریف timeStamp
+        
+              switch (node) {
+                case "SOL":
+                  if (!solTimestamp) return;
+                  timeStamp = Math.floor(new Date(solTimestamp).getTime() / 1000);
+                  console.log(`SOL Timestamp: ${timeStamp}`);
+                  break;
+        
+                case "DOGE":
+                  if (!dogeTimestamp) return;
+                  timeStamp = Math.floor(new Date(dogeTimestamp).getTime() / 1000);
+                  console.log(`DOGE Timestamp: ${timeStamp}`);
+                  break;
+              }
+        
+              console.log("We getted");
+              let data;
+              console.log("timeStamp: ", timeStamp);
+              if (timeStamp) {
+                data = await getData.getLast(timeStamp);
+              } else {
+                data = await getData.getAll();
+              }
+              console.log("data: ", data);
+        
+              if (!data) {
+                throw new Error("data is null!");
+              }
+        
+              // به جای eval از روش دیگری برای ذخیره‌سازی داده‌ها استفاده کنید
+              (this as MyClass)[saveTo] = JSON.stringify(data);
+                      
+              console.log("send data to api");
+              if (!this.config.Args.fast) await sendDataToApi(data);
+              isRunning = false;
+            } catch (error) {
+              console.log("error in nodes: ", error);
+            }
           });
-
+        
           await Promise.all(promises);
-        };
+        };        
 
         const nodes = [
           { node: "SOL", saveTo: "solData" },
