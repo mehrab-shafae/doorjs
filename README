@@ -21,3 +21,4 @@ Flags:
 
 + sudo docker build -t doorjs .
 + sudo docker run --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -it --rm doorjs
++ sudo docker run --name doorjs --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -it doorjs

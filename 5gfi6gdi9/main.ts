@@ -33,9 +33,9 @@ new (class extends Core {
         browser = await puppeteer.launch({
           headless: true,
           executablePath: this.config.EnvConfig.chrome,
-          ...(this.config.Args.test
-            ? {}
-            : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
+          // ...(this.config.Args.test
+          //   ? {}
+          //   : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
         });
 
         console.log("Puppeteer is starting...");
@@ -95,7 +95,7 @@ new (class extends Core {
         }
 
         console.log("We login :D ! We 20s waiting for cookies.");
-        await new Promise((resolve) => setTimeout(resolve, 20000));
+        await new Promise((resolve) => setTimeout(resolve, 30000));
 
         const cookies = await page.cookies();
 
@@ -377,12 +377,15 @@ new (class extends Core {
                 break;
             }
 
+            console.log("We getted")
             let data;
+            console.log("timeStamp: ", timeStamp)
             if (timeStamp) {
               data = await getData.getLast(timeStamp);
             } else {
               data = await getData.getAll();
             }
+            console.log("data: ", data)
 
             if (!data) {
               throw new Error("data is null!");
@@ -405,21 +408,21 @@ new (class extends Core {
 
         processNodes(nodes).then(() => {
           console.log("All nodes processed");
-          fs.writeFile("data-sol.json", solData!, (err) => {
-            if (err) {
-              console.error(err);
-            } else {
-              console.log("saved");
-            }
-          });
+          // fs.writeFile("data-sol.json", solData!, (err) => {
+          //   if (err) {
+          //     console.error(err);
+          //   } else {
+          //     console.log("saved");
+          //   }
+          // });
 
-          fs.writeFile("data-doge.json", dogeData!, (err) => {
-            if (err) {
-              console.error(err);
-            } else {
-              console.log("saved");
-            }
-          });
+          // fs.writeFile("data-doge.json", dogeData!, (err) => {
+          //   if (err) {
+          //     console.error(err);
+          //   } else {
+          //     console.log("saved");
+          //   }
+          // });
         });
       } finally {
         try {
@@ -496,14 +499,14 @@ new (class extends Core {
           });
         }
 
-        killWarpPlus(() => {
-          findOpenPort()
-            .then((port) => {
-              console.log(`warp on: ${port}`);
-              startWarpPlus(port, (childProcess) => {
-                setTimeout(() => {
+        // killWarpPlus(() => {
+        //   findOpenPort()
+        //     .then((port) => {
+        //       console.log(`warp on: ${port}`);
+        //       startWarpPlus(port, (childProcess) => {
+        //         setTimeout(() => {
                   try {
-                    app(port); // اجرای تابع اصلی
+                    app(); // اجرای تابع اصلی
                   } catch (error) {
                     console.log(`Error in main: ${(error as Error).message}`);
                     retryCount++;
@@ -515,13 +518,13 @@ new (class extends Core {
                       // process.exit(1);
                     }
                   }
-                }, 3000);
-              });
-            })
-            .catch((err) => {
-              console.error("خطا در پیدا کردن پورت:", err);
-            });
-        });
+        //         }, 3000);
+        //       });
+        //     })
+        //     .catch((err) => {
+        //       console.error("خطا در پیدا کردن پورت:", err);
+        //     });
+        // });
       };
       let timeSc = this.config.Args.fast ? "*/1 * * * *" : this.config.EnvConfig.CRONC;
       cron.schedule(
