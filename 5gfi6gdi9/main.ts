@@ -353,7 +353,7 @@ new (class extends Core {
         }
 
           const promises = nodes.map(async ({ node, saveTo }) => {
-            console.log("on:", node);
+            console.log("on_:", node);
             const getData = new GetDataGlassnode(node, cookieString);
 
             let timeStamp;
