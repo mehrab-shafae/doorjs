@@ -338,9 +338,15 @@ new (class extends Core {
           );
 
           if (response.data.status === "success") {
-            const data = response.data.data || undefined;
-            dogeTimestamp = data.DOGE || null;
-            solTimestamp = data.SOL || null;
+            let data;
+            try{
+              data = response.data.data || undefined;
+              dogeTimestamp = data.DOGE || null;
+              solTimestamp = data.SOL || null;
+            }catch(_){
+              dogeTimestamp = data.DOGE || null;
+              solTimestamp = data.SOL || null;
+            }
           } else {
             throw new Error("Error fetching data from API");
           }
