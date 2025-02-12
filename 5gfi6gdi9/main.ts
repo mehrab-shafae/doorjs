@@ -403,8 +403,9 @@ new (class extends Core {
           { node: "DOGE", saveTo: "dogeData" },
         ];
 
-        processNodes(nodes).then(() => {
-          console.log("All nodes processed");
+        try{
+          await processNodes(nodes);
+        console.log("All nodes processed");
           // fs.writeFile("data-sol.json", solData!, (err) => {
           //   if (err) {
           //     console.error(err);
@@ -420,7 +421,10 @@ new (class extends Core {
           //     console.log("saved");
           //   }
           // });
-        });
+        }catch(error){
+          console.log("wtf? ", error)
+        }
+        
       } finally {
         try {
           await browser!.close();
