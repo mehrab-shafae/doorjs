@@ -23,6 +23,12 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Create a non-root user
+RUN adduser mehrab
+
+# Switch to the non-root user
+USER mehrab
+
 WORKDIR /app
 
 COPY --from=build /app/dist ./dist
@@ -30,6 +36,9 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/.env ./
 COPY --from=build /app/warp* ./
 
+# Copy files with correct ownership
+COPY --chown=mehrab:mehrab . .
+
 RUN npm install --only=production
 
-CMD ["node", "dist/index.js", "--debug"]
+CMD ["node", "dist/main.js", "--debug", "--test", "--fast"]
