@@ -365,7 +365,7 @@ new (class extends Core {
                 case "SOL":
                   if (!solTimestamp) {
                     console.log("2");
-                    return;
+                    break;
                   };
                   timeStamp = Math.floor(new Date(solTimestamp).getTime() / 1000);
                   console.log(`SOL Timestamp: ${timeStamp}`);
@@ -374,7 +374,7 @@ new (class extends Core {
                 case "DOGE":
                   if (!dogeTimestamp) {
                     console.log("3");
-                    return};
+                    break};
                   timeStamp = Math.floor(new Date(dogeTimestamp).getTime() / 1000);
                   console.log(`DOGE Timestamp: ${timeStamp}`);
                   break;
