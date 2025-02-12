@@ -360,19 +360,25 @@ new (class extends Core {
         
               let timeStamp = null; // تعریف timeStamp
         
+              console.log("1");
               switch (node) {
                 case "SOL":
-                  if (!solTimestamp) return;
+                  if (!solTimestamp) {
+                    console.log("2");
+                    return;
+                  };
                   timeStamp = Math.floor(new Date(solTimestamp).getTime() / 1000);
                   console.log(`SOL Timestamp: ${timeStamp}`);
                   break;
         
                 case "DOGE":
-                  if (!dogeTimestamp) return;
+                  if (!dogeTimestamp) {
+                    console.log("3");
+                    return};
                   timeStamp = Math.floor(new Date(dogeTimestamp).getTime() / 1000);
                   console.log(`DOGE Timestamp: ${timeStamp}`);
                   break;
-              }
+              };
         
               console.log("We getted");
               let data;
@@ -390,7 +396,7 @@ new (class extends Core {
         
               // به جای eval از روش دیگری برای ذخیره‌سازی داده‌ها استفاده کنید
               (this as MyClass)[saveTo] = JSON.stringify(data);
-                      
+
               console.log("send data to api");
               if (!this.config.Args.fast) await sendDataToApi(data);
               isRunning = false;
