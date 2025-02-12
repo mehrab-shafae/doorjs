@@ -353,6 +353,9 @@ new (class extends Core {
         }
 
           const promises = nodes.map(async ({ node, saveTo }) => {
+            try{
+
+            
             console.log("on:", node);
             const getData = new GetDataGlassnode(node, cookieString);
 
@@ -396,6 +399,11 @@ new (class extends Core {
             console.log("send data to api");
             if (!this.config.Args.fast) await sendDataToApi(data);
             isRunning = false;
+            
+          }catch(error){
+            console.log("error in nodes: ", error)
+          }
+
           });
 
           await Promise.all(promises);
