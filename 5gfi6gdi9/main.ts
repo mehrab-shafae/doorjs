@@ -325,6 +325,7 @@ new (class extends Core {
           let dogeTimestamp = null;
           let solTimestamp = null;
 
+          try{
           const response = await axios.get(
             this.config.EnvConfig.databasep +
               "/feed/all_symbols/last_timestamps",
@@ -339,17 +340,17 @@ new (class extends Core {
 
           if (response.status === 200) {
             let data;
-            try{
               data = response.data.data || undefined;
               dogeTimestamp = data.DOGE || null;
               solTimestamp = data.SOL || null;
-            }catch(_){
-              dogeTimestamp = data.DOGE || null;
-              solTimestamp = data.SOL || null;
-            }
           } else {
             throw new Error("Error fetching data from API");
           }
+
+        }catch(_){
+          dogeTimestamp = null;
+          solTimestamp = null;
+        }
 
           const promises = nodes.map(async ({ node, saveTo }) => {
             console.log("on:", node);
