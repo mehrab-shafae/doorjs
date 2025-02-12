@@ -337,7 +337,7 @@ new (class extends Core {
             }
           );
 
-          if (response.data.status === "success") {
+          if (response.status === 200) {
             let data;
             try{
               data = response.data.data || undefined;
