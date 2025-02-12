@@ -16,3 +16,8 @@ Flags:
     test: skip cron job
     debug: show messages to terminal
 """
+
+## Docker
+
++ sudo docker build -t doorjs .
++ sudo docker run --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -it --rm doorjs
