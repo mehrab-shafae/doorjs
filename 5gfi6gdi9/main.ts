@@ -358,6 +358,8 @@ new (class extends Core {
 
             let timeStamp;
 
+            console.log("SLIP 1")
+
             switch (node) {
               case "SOL":
                 if (!solTimestamp) return;
@@ -377,6 +379,7 @@ new (class extends Core {
                 break;
             }
 
+            console.log("SLIP")
             let data;
             if (timeStamp) {
               data = await getData.getLast(timeStamp);
