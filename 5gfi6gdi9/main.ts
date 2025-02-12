@@ -353,12 +353,10 @@ new (class extends Core {
         }
 
           const promises = nodes.map(async ({ node, saveTo }) => {
-            console.log("on_:", node);
+            console.log("on:", node);
             const getData = new GetDataGlassnode(node, cookieString);
 
             let timeStamp;
-
-            console.log("SLIP 1")
 
             switch (node) {
               case "SOL":
@@ -379,7 +377,6 @@ new (class extends Core {
                 break;
             }
 
-            console.log("SLIP")
             let data;
             if (timeStamp) {
               data = await getData.getLast(timeStamp);
@@ -406,28 +403,24 @@ new (class extends Core {
           { node: "DOGE", saveTo: "dogeData" },
         ];
 
-        try{
-          await processNodes(nodes);
-        console.log("All nodes processed");
-          // fs.writeFile("data-sol.json", solData!, (err) => {
-          //   if (err) {
-          //     console.error(err);
-          //   } else {
-          //     console.log("saved");
-          //   }
-          // });
+        processNodes(nodes).then(() => {
+          console.log("All nodes processed");
+          fs.writeFile("data-sol.json", solData!, (err) => {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log("saved");
+            }
+          });
 
-          // fs.writeFile("data-doge.json", dogeData!, (err) => {
-          //   if (err) {
-          //     console.error(err);
-          //   } else {
-          //     console.log("saved");
-          //   }
-          // });
-        }catch(error){
-          console.log("wtf? ", error)
-        }
-        
+          fs.writeFile("data-doge.json", dogeData!, (err) => {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log("saved");
+            }
+          });
+        });
       } finally {
         try {
           await browser!.close();
