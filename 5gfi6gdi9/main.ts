@@ -319,94 +319,88 @@ new (class extends Core {
           }
         };
 
-        interface MyClass {
-          [key: string]: any; // یا نوع خاصی که می‌خواهید
+        interface Eval {
+          [key: string]: any;
         }
         const processNodes = async (
           nodes: Array<{ node: string; saveTo: string }>
         ) => {
           let dogeTimestamp = null;
           let solTimestamp = null;
-        
-          try {
-            const response = await axios.get(
-              this.config.EnvConfig.databasep +
-                "/feed/all_symbols/last_timestamps",
-              {
-                headers: {
-                  Accept: "application/json",
-                  "Content-Type": "application/json",
-                },
-                timeout: 5000,
-              }
-            );
-        
-            if (response.status === 200) {
-              let data = response.data.data || {};
+
+          try{
+          const response = await axios.get(
+            this.config.EnvConfig.databasep +
+              "/feed/all_symbols/last_timestamps",
+            {
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              timeout: 5000,
+            }
+          );
+
+          if (response.status === 200) {
+            let data;
+              data = response.data.data || undefined;
               dogeTimestamp = data.DOGE || null;
               solTimestamp = data.SOL || null;
-            } else {
-              throw new Error("Error fetching data from API");
-            }
-          } catch (_) {
-            dogeTimestamp = null;
-            solTimestamp = null;
+          } else {
+            throw new Error("Error fetching data from API");
           }
-        
-          const promises = nodes.map(async ({ node, saveTo }) => {
-            try {
-              console.log("on:", node);
-              const getData = new GetDataGlassnode(node, cookieString);
-        
-              let timeStamp = null; // تعریف timeStamp
-        
-              console.log("1");
-              switch (node) {
-                case "SOL":
-                  if (!solTimestamp) {
-                    console.log("2");
-                    break;
-                  };
-                  timeStamp = Math.floor(new Date(solTimestamp).getTime() / 1000);
-                  console.log(`SOL Timestamp: ${timeStamp}`);
-                  break;
-        
-                case "DOGE":
-                  if (!dogeTimestamp) {
-                    console.log("3");
-                    break};
-                  timeStamp = Math.floor(new Date(dogeTimestamp).getTime() / 1000);
-                  console.log(`DOGE Timestamp: ${timeStamp}`);
-                  break;
-              };
-        
-              console.log("We getted");
-              let data;
-              console.log("timeStamp: ", timeStamp);
-              if (timeStamp) {
-                data = await getData.getLast(timeStamp);
-              } else {
-                data = await getData.getAll();
-              }
-              console.log("data: ", data);
-        
-              if (!data) {
-                throw new Error("data is null!");
-              }
-        
-              // به جای eval از روش دیگری برای ذخیره‌سازی داده‌ها استفاده کنید
-              (this as MyClass)[saveTo] = JSON.stringify(data);
 
-              console.log("send data to api");
-              if (!this.config.Args.fast) await sendDataToApi(data);
-              isRunning = false;
-            } catch (error) {
-              console.log("error in nodes: ", error);
+        }catch(_){
+          dogeTimestamp = null;
+          solTimestamp = null;
+        }
+
+          const promises = nodes.map(async ({ node, saveTo }) => {
+            console.log("on:", node);
+            const getData = new GetDataGlassnode(node, cookieString);
+
+            let timeStamp;
+
+            switch (node) {
+              case "SOL":
+                if (!solTimestamp) break;
+                timeStamp = Math.floor(new Date(solTimestamp).getTime() / 1000);
+
+                console.log(`SOL Timestamp: ${timeStamp}`);
+                break;
+
+              case "DOGE":
+                if (!dogeTimestamp) break;
+                timeStamp = Math.floor(
+                  new Date(dogeTimestamp).getTime() / 1000
+                );
+
+                console.log(`DOGE Timestamp: ${timeStamp}`);
+
+                break;
             }
+
+            let data;
+            if (timeStamp) {
+              data = await getData.getLast(timeStamp);
+            } else {
+              data = await getData.getAll();
+            }
+
+            if (!data) {
+              throw new Error("data is null!");
+            }
+
+            // eval(`${saveTo} = JSON.stringify(data)`);
+            (this as Eval)[saveTo] = JSON.stringify(data);
+
+            console.log("send data to api");
+            if (!this.config.Args.fast) await sendDataToApi(data);
+            isRunning = false;
           });
-        
+
           await Promise.all(promises);
-        };        
+        };
 
         const nodes = [
           { node: "SOL", saveTo: "solData" },
@@ -415,21 +409,21 @@ new (class extends Core {
 
         processNodes(nodes).then(() => {
           console.log("All nodes processed");
-          // fs.writeFile("data-sol.json", solData!, (err) => {
-          //   if (err) {
-          //     console.error(err);
-          //   } else {
-          //     console.log("saved");
-          //   }
-          // });
+          fs.writeFile("data-sol.json", solData!, (err) => {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log("saved");
+            }
+          });
 
-          // fs.writeFile("data-doge.json", dogeData!, (err) => {
-          //   if (err) {
-          //     console.error(err);
-          //   } else {
-          //     console.log("saved");
-          //   }
-          // });
+          fs.writeFile("data-doge.json", dogeData!, (err) => {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log("saved");
+            }
+          });
         });
       } finally {
         try {
