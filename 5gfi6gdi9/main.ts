@@ -27,7 +27,7 @@ new (class extends Core {
   Main() {
     let cachePort: number | undefined;
     const app = async (warpPort?: number) => {
-      if(!cachePort) cachePort = warpPort || undefined;
+      if (!cachePort) cachePort = warpPort || undefined;
       let browser;
       try {
         browser = await puppeteer.launch({
@@ -328,32 +328,31 @@ new (class extends Core {
           let dogeTimestamp = null;
           let solTimestamp = null;
 
-          try{
-          const response = await axios.get(
-            this.config.EnvConfig.databasep +
-              "/feed/all_symbols/last_timestamps",
-            {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-              },
-              timeout: 5000,
-            }
-          );
+          try {
+            const response = await axios.get(
+              this.config.EnvConfig.databasep +
+                "/feed/all_symbols/last_timestamps",
+              {
+                headers: {
+                  Accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                timeout: 5000,
+              }
+            );
 
-          if (response.status === 200) {
-            let data;
+            if (response.status === 200) {
+              let data;
               data = response.data.data || undefined;
               dogeTimestamp = data.DOGE || null;
               solTimestamp = data.SOL || null;
-          } else {
-            throw new Error("Error fetching data from API");
+            } else {
+              throw new Error("Error fetching data from API");
+            }
+          } catch (_) {
+            dogeTimestamp = null;
+            solTimestamp = null;
           }
-
-        }catch(_){
-          dogeTimestamp = null;
-          solTimestamp = null;
-        }
 
           const promises = nodes.map(async ({ node, saveTo }) => {
             console.log("on:", node);
@@ -410,21 +409,10 @@ new (class extends Core {
         processNodes(nodes).then(() => {
           console.log("All nodes processed");
           // fs.writeFileSync("data-sol.json", parseInt(nextBlock, 10).toString())
-          fs.writeFile("data-sol.json", solData!, (err) => {
-            if (err) {
-              console.error(err);
-            } else {
-              console.log("saved");
-            }
-          });
-
-          fs.writeFile("data-doge.json", dogeData!, (err) => {
-            if (err) {
-              console.error(err);
-            } else {
-              console.log("saved");
-            }
-          });
+          fs.writeFileSync("data-sol.json", solData!);
+          console.log("saved");
+          fs.writeFileSync("data-doge.json", dogeData!);
+          console.log("saved");
         });
       } finally {
         try {
@@ -446,36 +434,39 @@ new (class extends Core {
 
         let childProcess: ChildProcess | null = null;
 
-        function startWarpPlus(port: number, callback: (childProcess: ChildProcess) => void): void {
-            const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
-            childProcess = exec(command);
+        function startWarpPlus(
+          port: number,
+          callback: (childProcess: ChildProcess) => void
+        ): void {
+          const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
+          childProcess = exec(command);
 
-            childProcess.stdout?.on("data", (data: string) => {
-                if (data.includes("connection test successful") && !isWarpRunning) {
-                    isWarpRunning = true;
-                    console.log(`warp-plus is running on port ${port}`);
-                    callback(childProcess!);
-                }
-            });
+          childProcess.stdout?.on("data", (data: string) => {
+            if (data.includes("connection test successful") && !isWarpRunning) {
+              isWarpRunning = true;
+              console.log(`warp-plus is running on port ${port}`);
+              callback(childProcess!);
+            }
+          });
 
-            childProcess.stderr?.on("data", (data: string) => {
-                // می‌توانید اینجا خطاها را مدیریت کنید
-                // در حال حاضر فقط خطاها را نادیده می‌گیریم
-            });
+          childProcess.stderr?.on("data", (data: string) => {
+            // می‌توانید اینجا خطاها را مدیریت کنید
+            // در حال حاضر فقط خطاها را نادیده می‌گیریم
+          });
 
-            childProcess.on("exit", (code: number) => {
-                console.error(`warp-plus exited with code ${code}`);
-                if (code !== 0) {
-                    console.error('Error: warp-plus terminated unexpectedly.');
-                    // می‌توانید اینجا یک خطا برگردانید یا مدیریت کنید
-                }
-            });
+          childProcess.on("exit", (code: number) => {
+            console.error(`warp-plus exited with code ${code}`);
+            if (code !== 0) {
+              console.error("Error: warp-plus terminated unexpectedly.");
+              // می‌توانید اینجا یک خطا برگردانید یا مدیریت کنید
+            }
+          });
 
-            process.on('exit', () => {
-              if (childProcess) {
-                  childProcess.kill(); // متوقف کردن warp-plus
-                  console.log('warp-plus has been stopped.');
-              }
+          process.on("exit", () => {
+            if (childProcess) {
+              childProcess.kill(); // متوقف کردن warp-plus
+              console.log("warp-plus has been stopped.");
+            }
           });
         }
 
@@ -516,7 +507,9 @@ new (class extends Core {
                       console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
                       pur(); // try again ..
                     } else {
-                      console.log("[error] Max retries reached. Aborting... :(");
+                      console.log(
+                        "[error] Max retries reached. Aborting... :("
+                      );
                       // process.exit(1);
                     }
                   }
@@ -528,7 +521,9 @@ new (class extends Core {
             });
         });
       };
-      let timeSc = this.config.Args.fast ? "*/1 * * * *" : this.config.EnvConfig.CRONC;
+      let timeSc = this.config.Args.fast
+        ? "*/1 * * * *"
+        : this.config.EnvConfig.CRONC;
       cron.schedule(
         timeSc,
         () => {
