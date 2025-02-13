@@ -395,7 +395,7 @@ new (class extends Core {
             // (this as Eval)[saveTo] = JSON.stringify(data);
 
             console.log("send data to api");
-            if (!this.config.Args.fast) await sendDataToApi(data);
+            if (!this.config.Args.test) await sendDataToApi(data);
             isRunning = false;
           });
 
