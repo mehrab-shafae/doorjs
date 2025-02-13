@@ -64,6 +64,8 @@ RUN rm -f package-lock.json
 
 COPY --chown=chromeuser:chromeuser . .
 
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
 RUN npm install --only=production
 
 # For test add : , "--test", "--fast"
