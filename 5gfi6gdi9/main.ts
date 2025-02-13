@@ -25,6 +25,11 @@ let retryCount = 0;
 let retryCountL1 = 0;
 const MAX_RETRIES_L1 = 6;
 
+function resetTry(){
+  retryCountL1 = 0;
+  retryCount = 0;
+}
+
 new (class extends Core {
   Main() {
     let cachePort: number | undefined;
@@ -434,100 +439,110 @@ new (class extends Core {
       }
     };
 
-    function killWarpPlus(callback: () => void): void {
-      exec("which pkill", (error) => {
-        if (error) {
-          console.log("[Error] pkill command not found. Using alternative method.");
-          if (childProcess && childProcess.pid) {
-            process.kill(childProcess.pid); // استفاده از PID به عنوان جایگزین
-            console.log(`warp-plus with PID ${childProcess.pid} has been killed.`);
-          } else {
-            console.log("[Error] No warp-plus process found to kill.");
-          }
-          callback();
-        } else {
-          exec("pkill -f warp-plus", (error) => {
-            if (error) {
-              console.log(`[Error] killing warp-plus: ${error.message}`);
+    function killWarpPlus(): Promise<void> {
+      return new Promise((resolve, reject) => {
+        exec("which pkill", (error) => {
+          if (error) {
+            console.log("[Error] pkill command not found. Using alternative method.");
+            if (childProcess && childProcess.pid) {
+              process.kill(childProcess.pid); // استفاده از PID به عنوان جایگزین
+              console.log(`warp-plus with PID ${childProcess.pid} has been killed.`);
+              resolve();
             } else {
-              console.log("warp-plus has been killed.");
+              console.log("[Error] No warp-plus process found to kill.");
+              reject(new Error("No warp-plus process found to kill."));
             }
-            callback();
-          });
-        }
+          } else {
+            exec("pkill -f warp-plus", (error) => {
+              if (error) {
+                console.log(`[Error] killing warp-plus: ${error.message}`);
+                reject(error);
+              } else {
+                console.log("warp-plus has been killed.");
+                resolve();
+              }
+            });
+          }
+        });
       });
     }
-
+    
     let childProcess: ChildProcess | null = null;
 
-    function startWarpPlus(
-      port: number,
-      callback: (childProcess: ChildProcess) => void,
-      onError: (error: Error) => void
-    ): void {
-      const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
-      childProcess = exec(command);
-
-      childProcess.stdout?.on("data", (data: string) => {
-        if (data.includes("connection test successful") && !isWarpRunning) {
-          isWarpRunning = true;
-          console.log(`warp-plus is running on port ${port}`);
-          callback(childProcess!);
-        }
+    function startWarpPlus(port: number, timeout: number = 10000): Promise<ChildProcess> {
+      return new Promise((resolve, reject) => {
+        const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
+        childProcess = exec(command);
+    
+        const timeoutId = setTimeout(() => {
+          killWarpPlus().then(() => {
+            reject(new Error("warp-plus failed to start within the specified timeout."));
+          }).catch((error) => {
+            reject(error);
+          });
+        }, timeout);
+    
+        childProcess.stdout?.on("data", (data: string) => {
+          if (data.includes("connection test successful") && !isWarpRunning) {
+            isWarpRunning = true;
+            clearTimeout(timeoutId);
+            console.log(`warp-plus is running on port ${port}`);
+            resolve(childProcess!);
+          }
+        });
+    
+        childProcess.stderr?.on("data", (data: string) => {
+          console.error(`[Error] warp-plus stderr: ${data}`);
+        });
+    
+        childProcess.on("exit", (code: number) => {
+          console.log(`warp-plus exited with code ${code}`);
+          if (code !== 0) {
+            const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
+            console.error(`[Error] ${errorMessage}`);
+            reject(new Error(errorMessage));
+          }
+        });
       });
-
-      childProcess.stderr?.on("data", (data: string) => {
-        console.error(`[Error] warp-plus stderr: ${data}`);
-      });
-
-      childProcess.on("exit", (code: number) => {
-        console.log(`warp-plus exited with code ${code}`);
-        if (code !== 0) {
-          const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
-          console.error(`[Error] ${errorMessage}`);
-          onError(new Error(errorMessage));
-        }
-      });
-
-      process.on("exit", () => {
+    }
+    
+    function stopWarpPlus(): Promise<void> {
+      return new Promise((resolve, reject) => {
         if (childProcess) {
-          childProcess.kill(); // متوقف کردن warp-plus
-          console.log("warp-plus has been stopped.");
+          childProcess.kill();
+          console.log("warp-plus stopped");
+          resolve();
+        } else {
+          reject(new Error("No warp-plus process to stop."));
         }
       });
     }
-
-    function stopWarpPlus(): void {
-      if (childProcess) {
-        childProcess.kill();
-        console.log("warp-plus stopped");
-      }
-    }
-
+    
     function exitHandler(options: any, exitCode: any) {
       if (options.cleanup) console.log("clean");
       try {
-        stopWarpPlus();
+        stopWarpPlus().then(() => {
+          if (exitCode || exitCode === 0) console.log(exitCode);
+          if (options.exit) process.exit();
+        }).catch((error) => {
+          console.error(`[Error] ${error.message}`);
+          if (options.exit) process.exit();
+        });
       } catch (_) {}
-      if (exitCode || exitCode === 0) console.log(exitCode);
-      if (options.exit) process.exit();
     }
-
+    
     // do something when app is closing
     process.on("exit", exitHandler.bind(null, { cleanup: true }));
-
+    
     // catches ctrl+c event
     process.on("SIGINT", exitHandler.bind(null, { exit: true }));
-
+    
     // catches "kill pid" (for example: nodemon restart)
     process.on("SIGUSR1", exitHandler.bind(null, { exit: true }));
     process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
 
-    // catches uncaught exceptions
-    // process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
-
     const run = () => {
-      const pur = () => {
+      const pur = async () => {
         function findOpenPort(): Promise<number> {
           return new Promise((resolve, reject) => {
             const port = Math.floor(Math.random() * 65535) + 1;
@@ -544,40 +559,23 @@ new (class extends Core {
         }
 
         try {
-          killWarpPlus(() => {
-            findOpenPort()
-              .then((port) => {
+          await killWarpPlus();
+          findOpenPort()
+              .then(async (port) => {
                 console.log(`warp on: ${port}`);
-                startWarpPlus(
-                  port,
-                  (childProcess) => {
-                    setTimeout(() => {
-                      try {
-                        app(port); // اجرای تابع اصلی
-                      } catch (error) {
-                        console.log(
-                          `Error in main: ${(error as Error).message}`
-                        );
-                        retryCount++;
-                        if (retryCount < MAX_RETRIES) {
-                          console.log(
-                            `Retrying... (${retryCount}/${MAX_RETRIES})`
-                          );
-                          pur(); // try again ..
-                        } else {
-                          console.log(
-                            "[error] Max retries reached. Aborting... :("
-                          );
-                          // process.exit(1);
-                        }
-                      }
-                    }, 3000);
-                  },
-                  (error: Error) => {
-                    console.log(`Error in main: ${(error as Error).message}`);
+                await startWarpPlus(port);
+                setTimeout(() => {
+                  try {
+                    app(port);
+                  } catch (error) {
+                    console.log(
+                      `Error in main: ${(error as Error).message}`
+                    );
                     retryCount++;
                     if (retryCount < MAX_RETRIES) {
-                      console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+                      console.log(
+                        `Retrying... (${retryCount}/${MAX_RETRIES})`
+                      );
                       pur(); // try again ..
                     } else {
                       console.log(
@@ -586,12 +584,8 @@ new (class extends Core {
                       // process.exit(1);
                     }
                   }
-                );
-              })
-              .catch((err) => {
-                console.log("[error] cannot find port !", err);
+                }, 3000);
               });
-          });
         } catch (error) {
           console.log(`Error in main: ${(error as Error).message}`);
           retryCount++;
@@ -610,6 +604,7 @@ new (class extends Core {
       cron.schedule(
         timeSc,
         () => {
+          resetTry();
           if (isRunning) {
             console.log(
               "Previous instance is still running. Skipping this execution."
