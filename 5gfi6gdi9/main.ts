@@ -1,6 +1,8 @@
 // on the core ;)
 // by S-MRB-S
 
+process.stdin.resume(); // the program will not close instantly
+
 import { Core } from "@marboris/core";
 import puppeteer from "puppeteer";
 
@@ -315,6 +317,7 @@ new (class extends Core {
             console.log("Response:", res.status);
           } catch (error) {
             console.log("[Error] sendDataToApi => Axios error!");
+            return;
             // throw error;
           }
         };
@@ -399,6 +402,7 @@ new (class extends Core {
               await sendDataToApi(data)
             }
 
+            console.log('running false')
             isRunning = false;
           });
 
@@ -430,63 +434,83 @@ new (class extends Core {
       }
     };
 
+    function killWarpPlus(callback: () => void): void {
+      exec("pkill -f warp-plus", (error) => {
+        if (error) {
+          console.log(`[Error] killing warp-plus: ${error.message}`);
+        }
+        callback();
+      });
+    }
+
+    let childProcess: ChildProcess | null = null;
+
+    function startWarpPlus(
+      port: number,
+      callback: (childProcess: ChildProcess) => void
+    ): void {
+      const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
+      childProcess = exec(command);
+
+      childProcess.stdout?.on("data", (data: string) => {
+        if (data.includes("connection test successful") && !isWarpRunning) {
+          isWarpRunning = true;
+          console.log(`warp-plus is running on port ${port}`);
+          callback(childProcess!);
+        }
+      });
+
+      childProcess.stderr?.on("data", (data: string) => {
+        // می‌توانید اینجا خطاها را مدیریت کنید
+        // در حال حاضر فقط خطاها را نادیده می‌گیریم
+      });
+
+      childProcess.on("exit", (code: number) => {
+        console.log(`[Error] warp-plus exited with code ${code}`);
+        if (code !== 0) {
+          console.log("[Error] Error: warp-plus terminated unexpectedly.");
+          throw new Error("warp-plus terminated");
+          // می‌توانید اینجا یک خطا برگردانید یا مدیریت کنید
+        }
+      });
+
+      process.on("exit", () => {
+        if (childProcess) {
+          childProcess.kill(); // متوقف کردن warp-plus
+          console.log("warp-plus has been stopped.");
+        }
+      });
+    }
+
+    function stopWarpPlus(): void {
+      if (childProcess) {
+        childProcess.kill();
+        console.log("warp-plus stopped");
+      }
+    }
+
+    function exitHandler(options: any, exitCode: any) {
+      if (options.cleanup) console.log('clean');
+      try {stopWarpPlus();}catch(_){}
+      if (exitCode || exitCode === 0) console.log(exitCode);
+      if (options.exit) process.exit();
+    }
+    
+    // do something when app is closing
+    process.on('exit', exitHandler.bind(null,{cleanup:true}));
+    
+    // catches ctrl+c event
+    process.on('SIGINT', exitHandler.bind(null, {exit:true}));
+    
+    // catches "kill pid" (for example: nodemon restart)
+    process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
+    process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
+    
+    // catches uncaught exceptions
+    process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
+
     const run = () => {
       const pur = () => {
-        function killWarpPlus(callback: () => void): void {
-          exec("pkill -f warp-plus", (error) => {
-            if (error) {
-              console.log(`[Error] killing warp-plus: ${error.message}`);
-            }
-            callback();
-          });
-        }
-
-        let childProcess: ChildProcess | null = null;
-
-        function startWarpPlus(
-          port: number,
-          callback: (childProcess: ChildProcess) => void
-        ): void {
-          const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
-          childProcess = exec(command);
-
-          childProcess.stdout?.on("data", (data: string) => {
-            if (data.includes("connection test successful") && !isWarpRunning) {
-              isWarpRunning = true;
-              console.log(`warp-plus is running on port ${port}`);
-              callback(childProcess!);
-            }
-          });
-
-          childProcess.stderr?.on("data", (data: string) => {
-            // می‌توانید اینجا خطاها را مدیریت کنید
-            // در حال حاضر فقط خطاها را نادیده می‌گیریم
-          });
-
-          childProcess.on("exit", (code: number) => {
-            console.log(`[Error] warp-plus exited with code ${code}`);
-            if (code !== 0) {
-              console.log("[Error] Error: warp-plus terminated unexpectedly.");
-              throw new Error("warp-plus terminated");
-              // می‌توانید اینجا یک خطا برگردانید یا مدیریت کنید
-            }
-          });
-
-          process.on("exit", () => {
-            if (childProcess) {
-              childProcess.kill(); // متوقف کردن warp-plus
-              console.log("warp-plus has been stopped.");
-            }
-          });
-        }
-
-        function stopWarpPlus(childProcess: ChildProcess | null): void {
-          if (childProcess) {
-            childProcess.kill();
-            console.log("warp-plus stopped");
-          }
-        }
-
         function findOpenPort(): Promise<number> {
           return new Promise((resolve, reject) => {
             const port = Math.floor(Math.random() * 65535) + 1;
@@ -559,6 +583,11 @@ new (class extends Core {
           }
 
           isRunning = true;
+
+          setTimeout(() => {
+            isRunning = false;
+            stopWarpPlus();
+          }, 290000);
 
           const timeInUTC = moment().utc().format("YYYY-MM-DD HH:mm:ss");
           console.log(
