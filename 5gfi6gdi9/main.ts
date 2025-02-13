@@ -15,6 +15,7 @@ import axios from "axios";
 import { exec, ChildProcess } from "child_process";
 
 import * as net from "net";
+import { GetDataGlassnode } from "./gl.js";
 
 let isRunning = false;
 let isWarpRunning = false;
@@ -25,7 +26,7 @@ let retryCount = 0;
 let retryCountL1 = 0;
 const MAX_RETRIES_L1 = 6;
 
-function resetTry(){
+function resetTry() {
   retryCountL1 = 0;
   retryCount = 0;
 }
@@ -135,174 +136,6 @@ new (class extends Core {
           .map((cookie) => `${cookie.name}=${cookie.value}`)
           .join(";");
         console.log(cookieString);
-
-        function convertTimestampToISO(timestampInt: number) {
-          return moment
-            .unix(timestampInt)
-            .tz("UTC")
-            .toISOString()
-            .replace("+00:00", "Z");
-        }
-
-        const ENDPOINT_GLASSNODE_TX =
-          "https://api.glassnode.com/v1/metrics/transactions/count";
-        const ENDPOINT_GLASSNODE_FEE =
-          "https://api.glassnode.com/v1/metrics/fees/volume_sum";
-        const HEADER_GLASSNODE_REQUESTS = {
-          "user-agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0",
-          "sec-ch-ua":
-            '"Not A(Brand";v="8", "Chromium";v="132", "Microsoft Edge";v="132"',
-        };
-
-        class GetDataGlassnode {
-          symbol: string;
-          authHeaders: string;
-          endpointTx: string;
-          endpointFee: string;
-          paramsTx: object;
-          paramsFee: object;
-          headers: object | any;
-
-          constructor(symbol: string, authHeadersGlassnode: string) {
-            this.symbol = symbol;
-            this.authHeaders = authHeadersGlassnode;
-            this.endpointTx = ENDPOINT_GLASSNODE_TX;
-            this.endpointFee = ENDPOINT_GLASSNODE_FEE;
-
-            const PARAMS_GLASSNODE_TX = {
-              a: symbol,
-              i: "24h",
-              referrer: "charts",
-            };
-            const PARAMS_GLASSNODE_FEE = {
-              a: symbol,
-              i: "24h",
-              referrer: "charts",
-            };
-
-            this.paramsTx = { ...PARAMS_GLASSNODE_TX };
-            this.paramsFee = { ...PARAMS_GLASSNODE_FEE };
-            this.headers = { ...HEADER_GLASSNODE_REQUESTS };
-          }
-
-          async _checkConnection(
-            status: string,
-            lastTimestamp: number | null = null
-          ) {
-            this.headers.cookie = this.authHeaders;
-
-            try {
-              let responseTx, responseFee;
-
-              if (status === "all") {
-                [responseTx, responseFee] = await Promise.all([
-                  axios.get(this.endpointTx, {
-                    params: this.paramsTx,
-                    headers: this.headers,
-                    timeout: 10000,
-                  }),
-                  axios.get(this.endpointFee, {
-                    params: this.paramsFee,
-                    headers: this.headers,
-                    timeout: 10000,
-                  }),
-                ]);
-              } else if (status === "last") {
-                const txParams = {
-                  ...this.paramsTx,
-                  s: lastTimestamp?.toString(),
-                };
-                const feeParams = {
-                  ...this.paramsFee,
-                  s: lastTimestamp?.toString(),
-                };
-
-                [responseTx, responseFee] = await Promise.all([
-                  axios.get(this.endpointTx, {
-                    params: txParams,
-                    headers: this.headers,
-                    timeout: 10000,
-                  }),
-                  axios.get(this.endpointFee, {
-                    params: feeParams,
-                    headers: this.headers,
-                    timeout: 10000,
-                  }),
-                ]);
-              } else {
-                return null;
-              }
-
-              if (responseTx.status === 200 && responseFee.status === 200) {
-                console.log("[info] Glassnode connection successful");
-                return { tx: responseTx.data, fee: responseFee.data };
-              }
-
-              if ([responseTx.status, responseFee.status].includes(400)) {
-                console.log("[warning] Bad timestamp parameter");
-                return "bad timestamp parameter";
-              }
-
-              console.log("[error] Connection to Glassnode failed");
-              return null;
-            } catch (error: any) {
-              console.log(`[error] Connection error: ${error.message}`);
-              return null;
-            }
-          }
-
-          _timestampToISO(timestamp: number) {
-            return convertTimestampToISO(timestamp);
-          }
-
-          async getAll() {
-            const connectionResult = await this._checkConnection("all");
-            if (!connectionResult || typeof connectionResult === "string") {
-              return null;
-            }
-
-            return this._processData(connectionResult);
-          }
-
-          async getLast(lastTimestamp: number) {
-            const connectionResult = await this._checkConnection(
-              "last",
-              lastTimestamp
-            );
-            if (!connectionResult) return null;
-            if (typeof connectionResult === "string") return [];
-
-            return this._processData(connectionResult);
-          }
-
-          _processData({ tx, fee }: { tx: any[]; fee: any[] }) {
-            const processedData: any[] = [];
-            const txData: {
-              [key: string]: { transactions: number; fees?: number };
-            } = tx.reduce((acc, item) => {
-              acc[item.t] = { transactions: item.v };
-              return acc;
-            }, {} as { [key: string]: { transactions: number; fees?: number } });
-
-            fee.forEach((item) => {
-              if (txData[item.t]) {
-                txData[item.t].fees = item.v;
-              }
-            });
-
-            for (const [timestamp, values] of Object.entries(txData)) {
-              processedData.push({
-                symbol: this.symbol,
-                time: parseInt(timestamp), // this._timestampToISO
-                number_of_transactions: values.transactions,
-                total_fees_unit: values.fees || null,
-              });
-            }
-
-            return processedData;
-          }
-        }
 
         let solData: string, dogeData: string;
 
@@ -439,124 +272,88 @@ new (class extends Core {
       }
     };
 
-    let childProcess: ChildProcess | null = null;
-const MAX_RETRIES = 5; // حداکثر تعداد تلاش‌های مجدد
-const RETRY_DELAY = 5000; // تاخیر بین تلاش‌ها (میلی‌ثانیه)
-const START_TIMEOUT = 10000; // زمان‌بندی برای شروع warp-plus (میلی‌ثانیه)
-
-// تابع برای کشتن warp-plus
-async function killWarpPlus(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    exec("which pkill", (error) => {
-      if (error) {
-        console.log("[WARN] pkill command not found. Using alternative method.");
-        if (childProcess && childProcess.pid) {
-          process.kill(childProcess.pid); // استفاده از PID به عنوان جایگزین
-          console.log(`warp-plus with PID ${childProcess.pid} has been killed.`);
+    function killWarpPlus(): Promise<void> {
+      return new Promise((resolve, _) => {
+        exec("pkill -f warp-plus", (_) => {
           resolve();
-        } else {
-          console.log("[WARN] No warp-plus process found to kill.");
-          resolve(); // اگر فرآیندی برای کشتن وجود ندارد، خطا نیست
-        }
-      } else {
-        exec("pkill -f warp-plus", (error) => {
-          if (error) {
-            console.log(`[WARN] killing warp-plus: ${error.message}`);
-            resolve(); // حتی اگر کشتن موفق نبود، ادامه بده
-          } else {
-            console.log("warp-plus has been killed.");
-            resolve();
+        });
+      });
+    }
+
+    let childProcess: ChildProcess | null = null;
+
+    function startWarpPlus(
+      port: number,
+      timeout: number = 10000
+    ): Promise<ChildProcess> {
+      return new Promise((resolve, reject) => {
+        const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
+        childProcess = exec(command);
+
+        // const timeoutId = setTimeout(async () => {
+        //   await killWarpPlus();
+        // }, timeout);
+
+        childProcess.stdout?.on("data", (data: string) => {
+          if (data.includes("connection test successful") && !isWarpRunning) {
+            isWarpRunning = true;
+            // clearTimeout(timeoutId);
+            console.log(`warp-plus is running on port ${port}`);
+            resolve(childProcess!);
           }
         });
-      }
-    });
-  });
-}
 
-// تابع برای شروع warp-plus
-async function startWarpPlus(port: number): Promise<ChildProcess> {
-  return new Promise((resolve, reject) => {
-    const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
-    childProcess = exec(command);
+        childProcess.stderr?.on("data", (data: string) => {
+          console.error(`[Error] warp-plus stderr: ${data}`);
+        });
 
-    // زمان‌بندی برای شروع warp-plus
-    const timeoutId = setTimeout(() => {
-      reject(new Error("warp-plus failed to start within the specified timeout."));
-    }, START_TIMEOUT);
-
-    childProcess.stdout?.on("data", (data: string) => {
-      if (data.includes("connection test successful") && !isWarpRunning) {
-        isWarpRunning = true;
-        clearTimeout(timeoutId); // لغو زمان‌بندی
-        console.log(`warp-plus is running on port ${port}`);
-        resolve(childProcess!);
-      }
-    });
-
-    childProcess.stderr?.on("data", (data: string) => {
-      console.error(`[ERROR] warp-plus stderr: ${data}`);
-    });
-
-    childProcess.on("exit", (code: number) => {
-      console.log(`warp-plus exited with code ${code}`);
-      if (code !== 0) {
-        const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
-        console.error(`[ERROR] ${errorMessage}`);
-        reject(new Error(errorMessage));
-      }
-    });
-  });
-}
-
-// تابع برای متوقف کردن warp-plus
-async function stopWarpPlus(): Promise<void> {
-  if (childProcess) {
-    childProcess.kill();
-    console.log("warp-plus stopped.");
-  }
-}
-
-// تابع اصلی برای اجرای خودکار و تلاش مجدد
-async function runWarpPlus(port: number, retries: number = MAX_RETRIES): Promise<void> {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      console.log(`Attempt ${attempt} to start warp-plus...`);
-      await killWarpPlus(); // مطمئن شو هیچ فرآیند قبلی در حال اجرا نیست
-      const process = await startWarpPlus(port);
-      console.log("warp-plus started successfully.");
-      return; // اگر موفق شدیم، از حلقه خارج شو
-    } catch (error: any) {
-      console.error(`[ERROR] Attempt ${attempt} failed: ${error.message}`);
-      if (attempt < retries) {
-        console.log(`Retrying in ${RETRY_DELAY / 1000} seconds...`);
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY)); // تاخیر قبل از تلاش مجدد
-      } else {
-        console.error("[FATAL] Maximum retries reached. Exiting...");
-        throw new Error("Failed to start warp-plus after maximum retries.");
-      }
+        childProcess.on("exit", (code: number) => {
+          console.log(`warp-plus exited with code ${code}`);
+          if (code !== 0) {
+            const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
+            console.error(`[Error] ${errorMessage}`);
+            reject(new Error(errorMessage));
+          }
+        });
+      });
     }
-  }
-}
 
-// مدیریت خروج برنامه
-function exitHandler(options: any, exitCode: any) {
-  if (options.cleanup) console.log("Cleaning up...");
-  try {
-    stopWarpPlus().then(() => {
-      if (exitCode || exitCode === 0) console.log(`Exiting with code ${exitCode}`);
-      if (options.exit) process.exit();
-    });
-  } catch (error: any) {
-    console.error(`[ERROR] Failed to stop warp-plus: ${error.message}`);
-    if (options.exit) process.exit();
-  }
-}
+    function stopWarpPlus(): Promise<void> {
+      return new Promise((resolve, reject) => {
+        if (childProcess) {
+          childProcess.kill();
+          console.log("warp-plus stopped");
+          resolve();
+        } else {
+          reject(new Error("No warp-plus process to stop."));
+        }
+      });
+    }
 
-// رویدادهای خروج
-process.on("exit", exitHandler.bind(null, { cleanup: true }));
-process.on("SIGINT", exitHandler.bind(null, { exit: true }));
-process.on("SIGUSR1", exitHandler.bind(null, { exit: true }));
-process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
+    function exitHandler(options: any, exitCode: any) {
+      if (options.cleanup) console.log("clean");
+      try {
+        stopWarpPlus()
+          .then(() => {
+            if (exitCode || exitCode === 0) console.log(exitCode);
+            if (options.exit) process.exit();
+          })
+          .catch((error) => {
+            console.error(`[Error] ${error.message}`);
+            if (options.exit) process.exit();
+          });
+      } catch (_) {}
+    }
+
+    // do something when app is closing
+    process.on("exit", exitHandler.bind(null, { cleanup: true }));
+
+    // catches ctrl+c event
+    process.on("SIGINT", exitHandler.bind(null, { exit: true }));
+
+    // catches "kill pid" (for example: nodemon restart)
+    process.on("SIGUSR1", exitHandler.bind(null, { exit: true }));
+    process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
 
     const run = () => {
       const pur = async () => {
@@ -576,34 +373,26 @@ process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
         }
 
         try {
-          // await killWarpPlus();
-          findOpenPort()
-              .then(async (port) => {
-                console.log(`warp on: ${port}`);
-                // await startWarpPlus(port);
-                await runWarpPlus(port);
-                setTimeout(() => {
-                  try {
-                    app(port);
-                  } catch (error) {
-                    console.log(
-                      `Error in main: ${(error as Error).message}`
-                    );
-                    retryCount++;
-                    if (retryCount < MAX_RETRIES) {
-                      console.log(
-                        `Retrying... (${retryCount}/${MAX_RETRIES})`
-                      );
-                      pur(); // try again ..
-                    } else {
-                      console.log(
-                        "[error] Max retries reached. Aborting... :("
-                      );
-                      // process.exit(1);
-                    }
-                  }
-                }, 3000);
-              });
+          await killWarpPlus();
+          findOpenPort().then(async (port) => {
+            console.log(`warp on: ${port}`);
+            await startWarpPlus(port);
+            setTimeout(() => {
+              try {
+                app(port);
+              } catch (error) {
+                console.log(`Error in main: ${(error as Error).message}`);
+                retryCount++;
+                if (retryCount < MAX_RETRIES) {
+                  console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+                  pur(); // try again ..
+                } else {
+                  console.log("[error] Max retries reached. Aborting... :(");
+                  // process.exit(1);
+                }
+              }
+            }, 3000);
+          });
         } catch (error) {
           console.log(`Error in main: ${(error as Error).message}`);
           retryCount++;
