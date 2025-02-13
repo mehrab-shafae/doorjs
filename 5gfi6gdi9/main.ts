@@ -314,7 +314,7 @@ new (class extends Core {
             );
             console.log("Response:", res.status);
           } catch (error) {
-            console.log("[error] sendDataToApi => Axios error!");
+            console.log("[Error] sendDataToApi => Axios error!");
             // throw error;
           }
         };
