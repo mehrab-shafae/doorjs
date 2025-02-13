@@ -391,8 +391,8 @@ new (class extends Core {
               throw new Error("data is null!");
             }
 
-            // eval(`${saveTo} = JSON.stringify(data)`);
-            (this as Eval)[saveTo] = JSON.stringify(data);
+            eval(`${saveTo} = JSON.stringify(data)`);
+            // (this as Eval)[saveTo] = JSON.stringify(data);
 
             console.log("send data to api");
             if (!this.config.Args.fast) await sendDataToApi(data);
@@ -409,6 +409,7 @@ new (class extends Core {
 
         processNodes(nodes).then(() => {
           console.log("All nodes processed");
+          // fs.writeFileSync("data-sol.json", parseInt(nextBlock, 10).toString())
           fs.writeFile("data-sol.json", solData!, (err) => {
             if (err) {
               console.error(err);
