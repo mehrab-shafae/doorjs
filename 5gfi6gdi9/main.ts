@@ -399,10 +399,10 @@ new (class extends Core {
 
             console.log("send data to api");
             if (!this.config.Args.test) {
-              await sendDataToApi(data)
+              await sendDataToApi(data);
             }
 
-            console.log('running false')
+            console.log("running false");
             isRunning = false;
           });
 
@@ -416,12 +416,12 @@ new (class extends Core {
 
         processNodes(nodes).then(() => {
           console.log("All nodes processed");
-          try{
+          try {
             fs.writeFileSync("data-sol.json", solData!);
-          console.log("saved");
-          fs.writeFileSync("data-doge.json", dogeData!);
-          console.log("saved");
-          }catch(_){
+            console.log("saved");
+            fs.writeFileSync("data-doge.json", dogeData!);
+            console.log("saved");
+          } catch (_) {
             console.log("Error in saving data to file!");
           }
         });
@@ -447,7 +447,8 @@ new (class extends Core {
 
     function startWarpPlus(
       port: number,
-      callback: (childProcess: ChildProcess) => void
+      callback: (childProcess: ChildProcess) => void,
+      onError: (error: Error) => void
     ): void {
       const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
       childProcess = exec(command);
@@ -461,16 +462,15 @@ new (class extends Core {
       });
 
       childProcess.stderr?.on("data", (data: string) => {
-        // می‌توانید اینجا خطاها را مدیریت کنید
-        // در حال حاضر فقط خطاها را نادیده می‌گیریم
+        console.error(`[Error] warp-plus stderr: ${data}`);
       });
 
       childProcess.on("exit", (code: number) => {
-        console.log(`[Error] warp-plus exited with code ${code}`);
+        console.log(`warp-plus exited with code ${code}`);
         if (code !== 0) {
-          console.log("[Error] Error: warp-plus terminated unexpectedly.");
-          throw new Error("warp-plus terminated");
-          // می‌توانید اینجا یک خطا برگردانید یا مدیریت کنید
+          const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
+          console.error(`[Error] ${errorMessage}`);
+          onError(new Error(errorMessage));
         }
       });
 
@@ -490,22 +490,24 @@ new (class extends Core {
     }
 
     function exitHandler(options: any, exitCode: any) {
-      if (options.cleanup) console.log('clean');
-      try {stopWarpPlus();}catch(_){}
+      if (options.cleanup) console.log("clean");
+      try {
+        stopWarpPlus();
+      } catch (_) {}
       if (exitCode || exitCode === 0) console.log(exitCode);
       if (options.exit) process.exit();
     }
-    
+
     // do something when app is closing
-    process.on('exit', exitHandler.bind(null,{cleanup:true}));
-    
+    process.on("exit", exitHandler.bind(null, { cleanup: true }));
+
     // catches ctrl+c event
-    process.on('SIGINT', exitHandler.bind(null, {exit:true}));
-    
+    process.on("SIGINT", exitHandler.bind(null, { exit: true }));
+
     // catches "kill pid" (for example: nodemon restart)
-    process.on('SIGUSR1', exitHandler.bind(null, {exit:true}));
-    process.on('SIGUSR2', exitHandler.bind(null, {exit:true}));
-    
+    process.on("SIGUSR1", exitHandler.bind(null, { exit: true }));
+    process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
+
     // catches uncaught exceptions
     // process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
 
@@ -531,43 +533,61 @@ new (class extends Core {
             findOpenPort()
               .then((port) => {
                 console.log(`warp on: ${port}`);
-                startWarpPlus(port, (childProcess) => {
-                  setTimeout(() => {
-                    try {
-                      app(port); // اجرای تابع اصلی
-                    } catch (error) {
-                      console.log(`Error in main: ${(error as Error).message}`);
-                      retryCount++;
-                      if (retryCount < MAX_RETRIES) {
-                        console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
-                        pur(); // try again ..
-                      } else {
+                startWarpPlus(
+                  port,
+                  (childProcess) => {
+                    setTimeout(() => {
+                      try {
+                        app(port); // اجرای تابع اصلی
+                      } catch (error) {
                         console.log(
-                          "[error] Max retries reached. Aborting... :("
+                          `Error in main: ${(error as Error).message}`
                         );
-                        // process.exit(1);
+                        retryCount++;
+                        if (retryCount < MAX_RETRIES) {
+                          console.log(
+                            `Retrying... (${retryCount}/${MAX_RETRIES})`
+                          );
+                          pur(); // try again ..
+                        } else {
+                          console.log(
+                            "[error] Max retries reached. Aborting... :("
+                          );
+                          // process.exit(1);
+                        }
                       }
+                    }, 3000);
+                  },
+                  (error: Error) => {
+                    console.log(`Error in main: ${(error as Error).message}`);
+                    retryCount++;
+                    if (retryCount < MAX_RETRIES) {
+                      console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+                      pur(); // try again ..
+                    } else {
+                      console.log(
+                        "[error] Max retries reached. Aborting... :("
+                      );
+                      // process.exit(1);
                     }
-                  }, 3000);
-                });
+                  }
+                );
               })
               .catch((err) => {
                 console.log("[error] cannot find port !", err);
               });
           });
-      } catch (error) {
-        console.log(`Error in main: ${(error as Error).message}`);
-        retryCount++;
-        if (retryCount < MAX_RETRIES) {
-          console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
-          pur(); // try again ..
-        } else {
-          console.log(
-            "[error] Max retries reached. Aborting... :("
-          );
-          // process.exit(1);
+        } catch (error) {
+          console.log(`Error in main: ${(error as Error).message}`);
+          retryCount++;
+          if (retryCount < MAX_RETRIES) {
+            console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+            pur(); // try again ..
+          } else {
+            console.log("[error] Max retries reached. Aborting... :(");
+            // process.exit(1);
+          }
         }
-      }
       };
       let timeSc = this.config.Args.fast
         ? "*/1 * * * *"
