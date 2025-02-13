@@ -1,5 +1,7 @@
 import { exec, ChildProcess } from "child_process";
 
+import * as net from "net";
+
 //--------------------------------------------------------
 
 let childProcess: ChildProcess | null = null;
@@ -39,8 +41,23 @@ export function startWarpPlus(
         const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
         console.error(`[Error] ${errorMessage}`);
         isWarpRunning = false;
-        reject(new Error(errorMessage));
+        reject("warp terminated unexpectedly!!");
       }
+    });
+  });
+}
+
+export function findOpenPort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const port = Math.floor(Math.random() * 65535) + 1;
+    const server = net.createServer();
+
+    server.listen(port, () => {
+      server.close(() => resolve(port));
+    });
+
+    server.on("error", () => {
+      findOpenPort().then(resolve).catch(reject);
     });
   });
 }
@@ -58,28 +75,28 @@ export function stopWarpPlus(): Promise<void> {
   });
 }
 
-function exitHandler(options: any, exitCode: any) {
-  if (options.cleanup) console.log("clean");
-  try {
-    stopWarpPlus()
-      .then(() => {
-        if (exitCode || exitCode === 0) console.log(exitCode);
-        if (options.exit) process.exit();
-      })
-      .catch((error) => {
-        console.error(`[Error] ${error.message}`);
-        if (options.exit) process.exit();
-      });
-  } catch (_) {}
-}
+// function exitHandler(options: any, exitCode: any) {
+//   if (options.cleanup) console.log("clean");
+//   try {
+//     stopWarpPlus()
+//       .then(() => {
+//         if (exitCode || exitCode === 0) console.log(exitCode);
+//         if (options.exit) process.exit();
+//       })
+//       .catch((error) => {
+//         console.error(`[Error] ${error.message}`);
+//         if (options.exit) process.exit();
+//       });
+//   } catch (_) {}
+// }
 
 //--------------------------------------------------------
 
 // do something when app is closing
-process.on("exit", exitHandler.bind(null, { cleanup: true }));
+// process.on("exit", exitHandler.bind(null, { cleanup: true }));
 
 // catches ctrl+c event
-process.on("SIGINT", exitHandler.bind(null, { exit: true }));
+// process.on("SIGINT", exitHandler.bind(null, { exit: true }));
 
 // catches "kill pid" (for example: nodemon restart)
 // process.on("SIGUSR1", exitHandler.bind(null, { exit: true }));

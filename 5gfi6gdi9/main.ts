@@ -15,9 +15,8 @@ import fs from "fs";
 import axios from "axios";
 
 
-import * as net from "net";
 import { GetDataGlassnode } from "./gl.js";
-import { startWarpPlus, stopWarpPlus } from "./exec.js";
+import { findOpenPort, startWarpPlus, stopWarpPlus } from "./exec.js";
 
 //--------------------------------------------------------
 
@@ -282,27 +281,17 @@ new (class extends Core {
 
     const run = () => {
       const pur = async () => {
-        function findOpenPort(): Promise<number> {
-          return new Promise((resolve, reject) => {
-            const port = Math.floor(Math.random() * 65535) + 1;
-            const server = net.createServer();
-
-            server.listen(port, () => {
-              server.close(() => resolve(port));
-            });
-
-            server.on("error", () => {
-              findOpenPort().then(resolve).catch(reject);
-            });
-          });
-        }
+        
 
         try {
           await stopWarpPlus();
-          findOpenPort().then(async (port) => {
+          const port = await findOpenPort();
+          // findOpenPort().then(async (port) => {
             console.log(`warp on: ${port}`);
-            await startWarpPlus(port);
-            setTimeout(() => {
+            await startWarpPlus(port).catch((err: any)=> {
+              throw new Error(err);
+            });
+            // setTimeout(() => {
               try {
                 app(port);
               } catch (error) {
@@ -316,8 +305,8 @@ new (class extends Core {
                   // process.exit(1);
                 }
               }
-            }, 3000);
-          });
+          //   }, 3000);
+          // });
         } catch (error) {
           console.log(`Error in main: ${(error as Error).message}`);
           retryCount++;
