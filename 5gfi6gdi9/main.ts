@@ -314,14 +314,14 @@ new (class extends Core {
             );
             console.log("Response:", res.status);
           } catch (error) {
-            console.error("Axios error!");
-            throw error;
+            console.log("[error] sendDataToApi => Axios error!");
+            // throw error;
           }
         };
 
-        interface Eval {
-          [key: string]: any;
-        }
+        // interface Eval {
+        //   [key: string]: any;
+        // }
         const processNodes = async (
           nodes: Array<{ node: string; saveTo: string }>
         ) => {
@@ -350,6 +350,7 @@ new (class extends Core {
               throw new Error("Error fetching data from API");
             }
           } catch (_) {
+            console.log("Error in getting Timestamp from API!");
             dogeTimestamp = null;
             solTimestamp = null;
           }
@@ -408,16 +409,21 @@ new (class extends Core {
 
         processNodes(nodes).then(() => {
           console.log("All nodes processed");
-          // fs.writeFileSync("data-sol.json", parseInt(nextBlock, 10).toString())
-          fs.writeFileSync("data-sol.json", solData!);
+          try{
+            fs.writeFileSync("data-sol.json", solData!);
           console.log("saved");
           fs.writeFileSync("data-doge.json", dogeData!);
           console.log("saved");
+          }catch(_){
+            console.log("Error in saving data to file!");
+          }
         });
       } finally {
         try {
           await browser!.close();
-        } catch (_) {}
+        } catch (_) {
+          console.log("Error in closing browser");
+        }
       }
     };
 
@@ -455,9 +461,9 @@ new (class extends Core {
           });
 
           childProcess.on("exit", (code: number) => {
-            console.error(`warp-plus exited with code ${code}`);
+            console.log(`[Error] warp-plus exited with code ${code}`);
             if (code !== 0) {
-              console.error("Error: warp-plus terminated unexpectedly.");
+              console.log("[Error] Error: warp-plus terminated unexpectedly.");
               // می‌توانید اینجا یک خطا برگردانید یا مدیریت کنید
             }
           });
@@ -517,7 +523,7 @@ new (class extends Core {
               });
             })
             .catch((err) => {
-              console.error("خطا در پیدا کردن پورت:", err);
+              console.log("[error] cannot find port !", err);
             });
         });
       };
