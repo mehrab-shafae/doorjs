@@ -576,11 +576,12 @@ process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
         }
 
         try {
-          await killWarpPlus();
+          // await killWarpPlus();
           findOpenPort()
               .then(async (port) => {
                 console.log(`warp on: ${port}`);
-                await startWarpPlus(port);
+                // await startWarpPlus(port);
+                await runWarpPlus(port);
                 setTimeout(() => {
                   try {
                     app(port);
