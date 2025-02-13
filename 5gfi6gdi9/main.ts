@@ -14,7 +14,6 @@ import moment from "moment-timezone";
 import fs from "fs";
 import axios from "axios";
 
-
 import { GetDataGlassnode } from "./gl.js";
 import { findOpenPort, startWarpPlus, stopWarpPlus } from "./exec.js";
 
@@ -281,32 +280,14 @@ new (class extends Core {
 
     const run = () => {
       const pur = async () => {
-        
-
         try {
           await stopWarpPlus();
           const port = await findOpenPort();
-          // findOpenPort().then(async (port) => {
-            console.log(`warp on: ${port}`);
-            await startWarpPlus(port).catch((err: any)=> {
-              throw new Error(err);
-            });
-            // setTimeout(() => {
-              try {
-                app(port);
-              } catch (error) {
-                console.log(`Error in main: ${(error as Error).message}`);
-                retryCount++;
-                if (retryCount < MAX_RETRIES) {
-                  console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
-                  pur(); // try again ..
-                } else {
-                  console.log("[error] Max retries reached. Aborting... :(");
-                  // process.exit(1);
-                }
-              }
-          //   }, 3000);
-          // });
+          console.log(`warp on: ${port}`);
+          await startWarpPlus(port).catch((err: any) => {
+            throw new Error(err);
+          });
+          app(port);
         } catch (error) {
           console.log(`Error in main: ${(error as Error).message}`);
           retryCount++;
@@ -315,7 +296,6 @@ new (class extends Core {
             pur(); // try again ..
           } else {
             console.log("[error] Max retries reached. Aborting... :(");
-            // process.exit(1);
           }
         }
       };

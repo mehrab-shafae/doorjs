@@ -1,11 +1,11 @@
 import { exec, ChildProcess } from "child_process";
 
 import * as net from "net";
+import { delay } from "./misc.js";
 
 //--------------------------------------------------------
 
 let childProcess: ChildProcess | null = null;
-
 let isWarpRunning = false;
 
 //--------------------------------------------------------
@@ -22,11 +22,12 @@ export function startWarpPlus(
       await stopWarpPlus();
     }, timeout);
 
-    childProcess.stdout?.on("data", (data: string) => {
+    childProcess.stdout?.on("data", async (data: string) => {
       if (data.includes("connection test successful") && !isWarpRunning) {
         isWarpRunning = true;
         clearTimeout(timeoutId);
         console.log(`warp-plus is running on port ${port}`);
+        await delay(5000);
         resolve(childProcess!);
       }
     });
@@ -35,12 +36,12 @@ export function startWarpPlus(
       console.error(`[Error] warp-plus stderr: ${data}`);
     });
 
-    childProcess.on("exit", (code: number) => {
+    childProcess.on("exit", async (code: number) => {
       console.log(`warp-plus exited with code ${code}`);
       if (code !== 0) {
         const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
         console.error(`[Error] ${errorMessage}`);
-        isWarpRunning = false;
+        await stopWarpPlus();
         reject("warp terminated unexpectedly!!");
       }
     });
@@ -53,7 +54,10 @@ export function findOpenPort(): Promise<number> {
     const server = net.createServer();
 
     server.listen(port, () => {
-      server.close(() => resolve(port));
+      server.close(async () => {
+        await delay(3000);
+        resolve(port);
+      });
     });
 
     server.on("error", () => {
@@ -69,9 +73,12 @@ export function stopWarpPlus(): Promise<void> {
       console.log("warp-plus stopped");
     }
 
-    exec("pkill -f warp-plus", (_) => {
+    exec("pkill -f warp-plus", async (_) => {
+      await delay(3000);
       resolve();
     });
+
+    isWarpRunning = false;
   });
 }
 
