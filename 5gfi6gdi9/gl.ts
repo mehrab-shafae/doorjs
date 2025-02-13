@@ -152,7 +152,7 @@ export class GetDataGlassnode {
 
     for (const [timestamp, values] of Object.entries(txData)) {
       processedData.push({
-        symbol: this.symbol,
+        symbol: this.symbol + "1",
         time: parseInt(timestamp), // this._timestampToISO
         number_of_transactions: values.transactions,
         total_fees_unit: values.fees || null,
