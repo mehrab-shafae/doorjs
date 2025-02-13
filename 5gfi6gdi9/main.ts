@@ -467,6 +467,7 @@ new (class extends Core {
             console.log(`[Error] warp-plus exited with code ${code}`);
             if (code !== 0) {
               console.log("[Error] Error: warp-plus terminated unexpectedly.");
+              throw new Error("warp-plus terminated");
               // می‌توانید اینجا یک خطا برگردانید یا مدیریت کنید
             }
           });
@@ -501,34 +502,48 @@ new (class extends Core {
           });
         }
 
-        killWarpPlus(() => {
-          findOpenPort()
-            .then((port) => {
-              console.log(`warp on: ${port}`);
-              startWarpPlus(port, (childProcess) => {
-                setTimeout(() => {
-                  try {
-                    app(port); // اجرای تابع اصلی
-                  } catch (error) {
-                    console.log(`Error in main: ${(error as Error).message}`);
-                    retryCount++;
-                    if (retryCount < MAX_RETRIES) {
-                      console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
-                      pur(); // try again ..
-                    } else {
-                      console.log(
-                        "[error] Max retries reached. Aborting... :("
-                      );
-                      // process.exit(1);
+        try {
+          killWarpPlus(() => {
+            findOpenPort()
+              .then((port) => {
+                console.log(`warp on: ${port}`);
+                startWarpPlus(port, (childProcess) => {
+                  setTimeout(() => {
+                    try {
+                      app(port); // اجرای تابع اصلی
+                    } catch (error) {
+                      console.log(`Error in main: ${(error as Error).message}`);
+                      retryCount++;
+                      if (retryCount < MAX_RETRIES) {
+                        console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+                        pur(); // try again ..
+                      } else {
+                        console.log(
+                          "[error] Max retries reached. Aborting... :("
+                        );
+                        // process.exit(1);
+                      }
                     }
-                  }
-                }, 3000);
+                  }, 3000);
+                });
+              })
+              .catch((err) => {
+                console.log("[error] cannot find port !", err);
               });
-            })
-            .catch((err) => {
-              console.log("[error] cannot find port !", err);
-            });
-        });
+          });
+      } catch (error) {
+        console.log(`Error in main: ${(error as Error).message}`);
+        retryCount++;
+        if (retryCount < MAX_RETRIES) {
+          console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+          pur(); // try again ..
+        } else {
+          console.log(
+            "[error] Max retries reached. Aborting... :("
+          );
+          // process.exit(1);
+        }
+      }
       };
       let timeSc = this.config.Args.fast
         ? "*/5 * * * *"
