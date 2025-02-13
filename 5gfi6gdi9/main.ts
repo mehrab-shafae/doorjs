@@ -528,7 +528,7 @@ new (class extends Core {
         });
       };
       let timeSc = this.config.Args.fast
-        ? "*/1 * * * *"
+        ? "*/5 * * * *"
         : this.config.EnvConfig.CRONC;
       cron.schedule(
         timeSc,
