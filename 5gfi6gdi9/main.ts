@@ -435,11 +435,26 @@ new (class extends Core {
     };
 
     function killWarpPlus(callback: () => void): void {
-      exec("pkill -f warp-plus", (error) => {
+      exec("which pkill", (error) => {
         if (error) {
-          console.log(`[Error] killing warp-plus: ${error.message}`);
+          console.log("[Error] pkill command not found. Using alternative method.");
+          if (childProcess && childProcess.pid) {
+            process.kill(childProcess.pid); // استفاده از PID به عنوان جایگزین
+            console.log(`warp-plus with PID ${childProcess.pid} has been killed.`);
+          } else {
+            console.log("[Error] No warp-plus process found to kill.");
+          }
+          callback();
+        } else {
+          exec("pkill -f warp-plus", (error) => {
+            if (error) {
+              console.log(`[Error] killing warp-plus: ${error.message}`);
+            } else {
+              console.log("warp-plus has been killed.");
+            }
+            callback();
+          });
         }
-        callback();
       });
     }
 
