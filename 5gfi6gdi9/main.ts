@@ -450,13 +450,13 @@ new (class extends Core {
               resolve();
             } else {
               console.log("[Error] No warp-plus process found to kill.");
-              reject(new Error("No warp-plus process found to kill."));
+              // reject(new Error("No warp-plus process found to kill."));
             }
           } else {
             exec("pkill -f warp-plus", (error) => {
               if (error) {
                 console.log(`[Error] killing warp-plus: ${error.message}`);
-                reject(error);
+                // reject(error);
               } else {
                 console.log("warp-plus has been killed.");
                 resolve();
