@@ -447,11 +447,12 @@ new (class extends Core {
             if (childProcess && childProcess.pid) {
               process.kill(childProcess.pid); // استفاده از PID به عنوان جایگزین
               console.log(`warp-plus with PID ${childProcess.pid} has been killed.`);
-              resolve();
             } else {
               console.log("[Error] No warp-plus process found to kill.");
               // reject(new Error("No warp-plus process found to kill."));
             }
+
+            resolve();
           } else {
             exec("pkill -f warp-plus", (error) => {
               if (error) {
@@ -459,8 +460,9 @@ new (class extends Core {
                 // reject(error);
               } else {
                 console.log("warp-plus has been killed.");
-                resolve();
               }
+
+              resolve();
             });
           }
         });
