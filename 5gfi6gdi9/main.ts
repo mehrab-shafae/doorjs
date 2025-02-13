@@ -476,12 +476,8 @@ new (class extends Core {
         const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
         childProcess = exec(command);
     
-        const timeoutId = setTimeout(() => {
-          killWarpPlus().then(() => {
-            reject(new Error("warp-plus failed to start within the specified timeout."));
-          }).catch((error) => {
-            reject(error);
-          });
+        const timeoutId = setTimeout(async () => {
+          await killWarpPlus();
         }, timeout);
     
         childProcess.stdout?.on("data", (data: string) => {
