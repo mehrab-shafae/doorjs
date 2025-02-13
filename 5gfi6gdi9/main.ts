@@ -570,7 +570,7 @@ new (class extends Core {
       }
       };
       let timeSc = this.config.Args.fast
-        ? "*/5 * * * *"
+        ? "*/1 * * * *"
         : this.config.EnvConfig.CRONC;
       cron.schedule(
         timeSc,
