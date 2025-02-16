@@ -1,7 +1,7 @@
 //--------------------------------------------------------
-export const ENDPOINT_GLASSNODE_TX =
+export let ENDPOINT_GLASSNODE_TX =
   "https://api.glassnode.com/v1/metrics/transactions/count";
-export const ENDPOINT_GLASSNODE_FEE =
+export let ENDPOINT_GLASSNODE_FEE =
   "https://api.glassnode.com/v1/metrics/fees/volume_sum";
 
 //--------------------------------------------------------
@@ -14,8 +14,8 @@ export const HEADER_GLASSNODE_REQUESTS = {
 };
 
 //--------------------------------------------------------
-export const killWarp = "pkill -f warp-plus";
-export const startWarpCmd = "warp-plus --gool -b";
+export let killWarp = "pkill -f warp-plus";
+export let startWarpCmd = "warp-plus --gool -b";
 
 //--------------------------------------------------------
 export let WarpTimeout: number = 10000,
@@ -30,3 +30,29 @@ export let MAX_RETRIES_L1 = 6;
 
 export let HomePage = "https://studio.glassnode.com/home";
 export let MainCookieName = "ajs_anonymous_id";
+
+//--------------------------------------------------------
+export function initConfig(GEnv: any) {
+  ENDPOINT_GLASSNODE_TX = GEnv.ENDPOINT_GLASSNODE_TX;
+  ENDPOINT_GLASSNODE_FEE = GEnv.ENDPOINT_GLASSNODE_FEE;
+
+  //--------------------------------------------------------
+  DefaultAgent = GEnv.DefaultAgent;
+  //--------------------------------------------------------
+  killWarp = GEnv.killWarp;
+  startWarpCmd = GEnv.startWarpCmd;
+
+  //--------------------------------------------------------
+  (WarpTimeout = GEnv.WarpTimeout),
+    (WarpStartDelay = GEnv.WarpStartDelay),
+    (KillPortDelay = GEnv.KillPortDelay);
+  //--------------------------------------------------------
+  UnixTimeISOtz = GEnv.UnixTimeISOtz;
+  UnixTimeISOr = GEnv.UnixTimeISOr;
+  //--------------------------------------------------------
+  MAX_RETRIES = GEnv.MAX_RETRIES;
+  MAX_RETRIES_L1 = GEnv.MAX_RETRIES_L1;
+
+  HomePage = GEnv.HomePage;
+  MainCookieName = GEnv.MainCookieName;
+}

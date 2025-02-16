@@ -16,7 +16,13 @@ import axios from "axios";
 
 import { GetDataGlassnode } from "./Glassnode.js";
 import { findOpenPort, startWarpPlus, stopWarpPlus } from "./exec.js";
-import { DefaultAgent, HomePage, MainCookieName, MAX_RETRIES, MAX_RETRIES_L1 } from "./config.js";
+import {
+  DefaultAgent,
+  HomePage,
+  MainCookieName,
+  MAX_RETRIES,
+  MAX_RETRIES_L1,
+} from "./config.js";
 
 //--------------------------------------------------------
 let isRunning = false;
@@ -141,7 +147,8 @@ new (class extends Core {
         const sendDataToApi = async (data: any) => {
           try {
             const res = await axios.post(
-              this.config.EnvConfig.databasep + "/feed/",
+              this.config.EnvConfig.databasep +
+                this.config.EnvConfig.databasepSave,
               JSON.stringify(data),
               {
                 headers: {
@@ -171,7 +178,7 @@ new (class extends Core {
           try {
             const response = await axios.get(
               this.config.EnvConfig.databasep +
-                "/feed/all_symbols/last_timestamps",
+                this.config.EnvConfig.databasepGet,
               {
                 headers: {
                   Accept: "application/json",
@@ -293,7 +300,7 @@ new (class extends Core {
         }
       };
       let timeSc = this.config.Args.fast
-        ? "*/3 * * * *"
+        ? this.config.EnvConfig.CRONCtest
         : this.config.EnvConfig.CRONC;
       cron.schedule(
         timeSc,
@@ -313,7 +320,9 @@ new (class extends Core {
             stopWarpPlus();
           }, 290000);
 
-          const timeInUTC = moment().utc().format("YYYY-MM-DD HH:mm:ss");
+          const timeInUTC = moment()
+            .utc()
+            .format(this.config.EnvConfig.UtcFormat);
           console.log(
             `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
           );
@@ -321,7 +330,7 @@ new (class extends Core {
         },
         {
           scheduled: true,
-          timezone: "UTC",
+          timezone: this.config.EnvConfig.UnixTimeISOtz,
         }
       );
       console.log("[info] ~{5}`Cron job scheduled. It will run every night.`");
