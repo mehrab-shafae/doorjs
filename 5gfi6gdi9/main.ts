@@ -279,27 +279,28 @@ new (class extends Core {
       }
     };
 
-    const run = () => {
-      const pur = async () => {
-        try {
-          await stopWarpPlus();
-          const port = await findOpenPort();
-          console.log(`warp on: ${port}`);
-          await startWarpPlus(port).catch((err: any) => {
-            throw new Error(err);
-          });
-          app(port);
-        } catch (error) {
-          console.log(`Error in main: ${(error as Error).message}`);
-          retryCount++;
-          if (retryCount < MAX_RETRIES) {
-            console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
-            pur(); // try again ..
-          } else {
-            console.log("[error] Max retries reached. Aborting... :(");
-          }
+    const pur = async () => {
+      try {
+        await stopWarpPlus();
+        const port = await findOpenPort();
+        console.log(`warp on: ${port}`);
+        await startWarpPlus(port).catch((err: any) => {
+          throw new Error(err);
+        });
+        app(port);
+      } catch (error) {
+        console.log(`Error in main: ${(error as Error).message}`);
+        retryCount++;
+        if (retryCount < MAX_RETRIES) {
+          console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+          pur(); // try again ..
+        } else {
+          console.log("[error] Max retries reached. Aborting... :(");
         }
-      };
+      }
+    };
+
+    const StartCron = () => {
       let timeSc = this.config.Args.fast
         ? this.config.EnvConfig.CRONCtest
         : this.config.EnvConfig.CRONC;
@@ -341,7 +342,7 @@ new (class extends Core {
       if (this.config.Args.test) {
         void app();
       } else {
-        run();
+        StartCron();
       }
     })();
     //--------------------------------------------------------
