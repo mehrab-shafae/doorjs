@@ -287,13 +287,13 @@ new (class extends Core {
         await startWarpPlus(port).catch((err: any) => {
           throw new Error(err);
         });
-        app(port);
+        await app(port);
       } catch (error) {
         console.log(`Error in main: ${(error as Error).message}`);
         retryCount++;
         if (retryCount < MAX_RETRIES) {
           console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
-          pur(); // try again ..
+          await pur(); // try again ..
         } else {
           console.log("[error] Max retries reached. Aborting... :(");
         }
@@ -306,7 +306,7 @@ new (class extends Core {
         : this.config.EnvConfig.CRONC;
       cron.schedule(
         timeSc,
-        () => {
+        async () => {
           resetTry();
           if (isRunning) {
             console.log(
@@ -317,9 +317,9 @@ new (class extends Core {
 
           isRunning = true;
 
-          setTimeout(() => {
+          setTimeout(async () => {
             isRunning = false;
-            stopWarpPlus();
+            await stopWarpPlus();
           }, 290000);
 
           const timeInUTC = moment()
@@ -328,7 +328,7 @@ new (class extends Core {
           console.log(
             `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
           );
-          pur();
+          await pur();
         },
         {
           scheduled: true,
@@ -338,9 +338,9 @@ new (class extends Core {
       console.log("[info] ~{5}`Cron job scheduled. It will run every night.`");
     };
 
-    (() => {
+    (async () => {
       if (this.config.Args.test) {
-        void app();
+        await app();
       } else {
         StartCron();
       }
