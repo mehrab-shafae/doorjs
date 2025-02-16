@@ -38,6 +38,7 @@ export function startWarpPlus(
 
     childProcess.on("exit", async (code: number) => {
       console.log(`warp-plus exited with code ${code}`);
+      isWarpRunning = false;
       if (code !== 0) {
         const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
         console.error(`[Error] ${errorMessage}`);
@@ -78,7 +79,6 @@ export function stopWarpPlus(): Promise<void> {
       resolve();
     });
 
-    isWarpRunning = false;
   });
 }
 
