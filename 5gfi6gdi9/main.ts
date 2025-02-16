@@ -307,28 +307,30 @@ new (class extends Core {
       cron.schedule(
         timeSc,
         async () => {
-          resetTry();
-          if (isRunning) {
+          try {
+            resetTry();
+            if (isRunning) {
+              console.log(
+                "Previous instance is still running. Skipping this execution."
+              );
+              return;
+            }
+
+            isRunning = true;
+
+            setTimeout(async () => {
+              isRunning = false;
+              await stopWarpPlus();
+            }, 290000);
+
+            const timeInUTC = moment()
+              .utc()
+              .format(this.config.EnvConfig.UtcFormat);
             console.log(
-              "Previous instance is still running. Skipping this execution."
+              `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
             );
-            return; // اگر در حال اجرا است، از اجرای دوباره جلوگیری می‌کنیم
-          }
-
-          isRunning = true;
-
-          setTimeout(async () => {
-            isRunning = false;
-            await stopWarpPlus();
-          }, 290000);
-
-          const timeInUTC = moment()
-            .utc()
-            .format(this.config.EnvConfig.UtcFormat);
-          console.log(
-            `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
-          );
-          await pur();
+            await pur();
+          } catch (_) {}
         },
         {
           scheduled: true,
