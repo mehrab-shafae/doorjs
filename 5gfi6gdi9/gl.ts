@@ -1,16 +1,8 @@
 // Glassnode
 
 import axios from "axios";
-import moment from "moment-timezone";
 import { ENDPOINT_GLASSNODE_FEE, ENDPOINT_GLASSNODE_TX, HEADER_GLASSNODE_REQUESTS } from "./config.js";
-
-function convertTimestampToISO(timestampInt: number) {
-  return moment
-    .unix(timestampInt)
-    .tz("UTC")
-    .toISOString()
-    .replace("+00:00", "Z");
-}
+import { convertTimestampToISO } from "./misc.js";
 
 export class GetDataGlassnode {
   symbol: string;
