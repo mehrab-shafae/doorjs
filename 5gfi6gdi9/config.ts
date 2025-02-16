@@ -15,3 +15,6 @@ export const HEADER_GLASSNODE_REQUESTS = {
 //--------------------------------------------------------
 export const killWarp = "pkill -f warp-plus";
 export const startWarpCmd = "warp-plus --gool -b";
+
+export let WarpTimeout: number = 10000,
+  WarpStartDelay: number = 5000, KillPortDelay: number = 3000
