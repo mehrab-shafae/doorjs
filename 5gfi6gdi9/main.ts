@@ -4,7 +4,6 @@
 process.stdin.resume(); // the program will not close instantly
 
 //--------------------------------------------------------
-
 import { Core } from "@marboris/core";
 import puppeteer from "puppeteer";
 
