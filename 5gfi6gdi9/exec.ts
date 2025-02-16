@@ -2,7 +2,7 @@ import { exec, ChildProcess } from "child_process";
 
 import * as net from "net";
 import { delay } from "./misc.js";
-import { killWarp, KillPortDelay, startWarpCmd, WarpStartDelay, WarpTimeout } from "./config.js";
+import { killWarp, KillPortDelay, startWarpCmd, WarpStartDelay, WarpTimeout, MAX_RANDOM_PORT } from "./config.js";
 
 //--------------------------------------------------------
 let childProcess: ChildProcess | null = null;
@@ -50,7 +50,7 @@ export function startWarpPlus(
 //--------------------------------------------------------
 export function findOpenPort(): Promise<number> {
   return new Promise((resolve, reject) => {
-    const port = Math.floor(Math.random() * 65535) + 1;
+    const port = Math.floor(Math.random() * MAX_RANDOM_PORT) + 1;
     const server = net.createServer();
 
     server.listen(port, () => {

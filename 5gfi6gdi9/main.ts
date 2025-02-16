@@ -48,9 +48,9 @@ new (class extends Core {
       let browser;
       try {
         browser = await puppeteer.launch({
-          headless: true,
+          headless: this.config.EnvConfig.headless ? true : false,
           executablePath: this.config.EnvConfig.chrome,
-          ...(this.config.Args.test
+          ...(this.config.Args.test && !this.config.EnvConfig.proxy
             ? {}
             : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
         });

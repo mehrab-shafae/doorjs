@@ -31,6 +31,7 @@ export let MAX_RETRIES_L1 = 6;
 export let HomePage = "https://studio.glassnode.com/home";
 export let MainCookieName = "ajs_anonymous_id";
 
+export let MAX_RANDOM_PORT=0;
 //--------------------------------------------------------
 export function initConfig(GEnv: any) {
   ENDPOINT_GLASSNODE_TX = GEnv.ENDPOINT_GLASSNODE_TX;
@@ -55,4 +56,6 @@ export function initConfig(GEnv: any) {
 
   HomePage = GEnv.HomePage;
   MainCookieName = GEnv.MainCookieName;
+
+  MAX_RANDOM_PORT = GEnv.MAX_RANDOM_PORT;
 }
