@@ -12,12 +12,13 @@ import moment from "moment-timezone";
 import { findOpenPort, startWarpPlus, stopWarpPlus } from "./misc/exec.js";
 import { initConfig, MAX_RETRIES } from "./config/index.js";
 import { config, resetTry } from "./app/config/index.js";
-import { App as AppClass } from "./app/index.js";
 
 //--------------------------------------------------------
 export class MainCC extends Core {
-  Main() {
+  async Main() {
     initConfig(this.config.EnvConfig);
+    const { App: AppClass } = await import('./app/index.js');
+
     const App = new AppClass(this);
 
     const pur = async () => {
