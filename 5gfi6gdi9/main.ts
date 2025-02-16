@@ -18,7 +18,6 @@ import { GetDataGlassnode } from "./Glassnode.js";
 import { findOpenPort, startWarpPlus, stopWarpPlus } from "./exec.js";
 
 //--------------------------------------------------------
-
 let isRunning = false;
 
 const MAX_RETRIES = 5;
@@ -28,14 +27,12 @@ let retryCountL1 = 0;
 const MAX_RETRIES_L1 = 6;
 
 //--------------------------------------------------------
-
 function resetTry() {
   retryCountL1 = 0;
   retryCount = 0;
 }
 
 //--------------------------------------------------------
-
 new (class extends Core {
   Main() {
     //--------------------------------------------------------

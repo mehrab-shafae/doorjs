@@ -5,12 +5,10 @@ import { delay } from "./misc.js";
 import { killWarp, startWarpCmd } from "./config.js";
 
 //--------------------------------------------------------
-
 let childProcess: ChildProcess | null = null;
 let isWarpRunning = false;
 
 //--------------------------------------------------------
-
 export function startWarpPlus(
   port: number,
   timeout: number = 10000,
@@ -51,6 +49,7 @@ export function startWarpPlus(
   });
 }
 
+//--------------------------------------------------------
 export function findOpenPort(): Promise<number> {
   return new Promise((resolve, reject) => {
     const port = Math.floor(Math.random() * 65535) + 1;
@@ -69,6 +68,7 @@ export function findOpenPort(): Promise<number> {
   });
 }
 
+//--------------------------------------------------------
 export function stopWarpPlus(): Promise<void> {
   return new Promise((resolve, _) => {
     if (childProcess) {
