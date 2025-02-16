@@ -1,8 +1,8 @@
 import { exec, ChildProcess } from "child_process";
 
 import * as net from "net";
-import { delay } from "./misc.js";
-import { killWarp, KillPortDelay, startWarpCmd, WarpStartDelay, WarpTimeout, MAX_RANDOM_PORT } from "./config.js";
+import { delay } from "./index.js";
+import { killWarp, KillPortDelay, startWarpCmd, WarpStartDelay, WarpTimeout, MAX_RANDOM_PORT } from "../config/index.js";
 
 //--------------------------------------------------------
 let childProcess: ChildProcess | null = null;

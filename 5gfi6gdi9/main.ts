@@ -14,7 +14,7 @@ import fs from "fs";
 import axios from "axios";
 
 import { GetDataGlassnode } from "./Glassnode.js";
-import { findOpenPort, startWarpPlus, stopWarpPlus } from "./exec.js";
+import { findOpenPort, startWarpPlus, stopWarpPlus } from "./misc/exec.js";
 import {
   DefaultAgent,
   HomePage,
@@ -22,7 +22,7 @@ import {
   MainCookieName,
   MAX_RETRIES,
   MAX_RETRIES_L1,
-} from "./config.js";
+} from "./config/index.js";
 
 //--------------------------------------------------------
 let isRunning = false;
