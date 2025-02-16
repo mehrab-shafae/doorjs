@@ -5,279 +5,25 @@ process.stdin.resume(); // the program will not close instantly
 
 //--------------------------------------------------------
 import { Core } from "@marboris/core";
-import puppeteer from "puppeteer";
 
 import cron from "node-cron";
 import moment from "moment-timezone";
 
-import fs from "fs";
-import axios from "axios";
 
-import { GetDataGlassnode } from "./app/glassnode/index.js";
+
 import { findOpenPort, startWarpPlus, stopWarpPlus } from "./misc/exec.js";
 import {
-  DefaultAgent,
-  HomePage,
   initConfig,
-  MainCookieName,
   MAX_RETRIES,
-  MAX_RETRIES_L1,
 } from "./config/index.js";
-
-//--------------------------------------------------------
-let isRunning = false;
-
-let retryCount = 0;
-let retryCountL1 = 0;
-
-//--------------------------------------------------------
-function resetTry() {
-  retryCountL1 = 0;
-  retryCount = 0;
-}
+import { config, resetTry } from "./app/config/index.js";
+import { App as AppClass } from "./app/index.js";
 
 //--------------------------------------------------------
 export class MainCC extends Core {
   Main() {
     initConfig(this.config.EnvConfig);
-    //--------------------------------------------------------
-    let cachePort: number | undefined;
-    const app = async (warpPort?: number) => {
-      if (!cachePort) cachePort = warpPort || undefined;
-      let browser;
-      try {
-        browser = await puppeteer.launch({
-          headless: this.config.EnvConfig.headless ? true : false,
-          executablePath: this.config.EnvConfig.chrome,
-          ...(this.config.Args.test && !this.config.EnvConfig.proxy
-            ? {}
-            : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
-        });
-
-        console.log("Puppeteer is starting...");
-        const page = await browser.newPage();
-
-        await page.deleteCookie(...(await page.cookies()));
-        await page.setUserAgent(DefaultAgent);
-        await page.goto(HomePage, {
-          waitUntil: "networkidle0",
-          timeout: this.config.EnvConfig.HomePageTimeout,
-        });
-        await page.reload(); // we need clear cache like ctrl+F5
-
-        console.log("We load the Glassnode site.. 8s waiting.");
-        await new Promise((resolve) => setTimeout(resolve, 8000));
-
-        try {
-          await page.click('button[data-cy="login-btn"]');
-        } catch (error) {
-          console.log(`Error in L1: ${(error as Error).message}`);
-          retryCountL1++;
-          if (retryCountL1 < MAX_RETRIES_L1) {
-            console.log(`Retrying... (${retryCountL1}/${MAX_RETRIES_L1})`);
-            app(); // try again ..
-            return;
-          } else {
-            console.log("[L1] Max retries reached. Restarting...");
-            throw new Error("L1 dumped");
-          }
-        }
-
-        console.log("Login button founded ! we sleep 8s more..");
-        await new Promise((resolve) => setTimeout(resolve, 8000));
-
-        try {
-          await page.type('input[name="email"]', this.config.EnvConfig.email);
-          await page.type(
-            'input[name="current-password"]',
-            this.config.EnvConfig.password
-          );
-
-          console.log("We try login...");
-          await page.click("button.MuiButton-containedPrimary");
-        } catch (error) {
-          console.log(`Error in L1: ${(error as Error).message}`);
-          retryCountL1++;
-          if (retryCountL1 < MAX_RETRIES_L1) {
-            console.log(`Retrying... (${retryCountL1}/${MAX_RETRIES_L1})`);
-            app(); // try again ..
-            return;
-          } else {
-            console.log("[L1] Max retries reached. Restarting...");
-            throw new Error("L1 dumped");
-          }
-        }
-
-        console.log("We login :D ! We 20s waiting for cookies.");
-        await new Promise((resolve) => setTimeout(resolve, 20000));
-
-        const cookies = await page.cookies();
-
-        try {
-          console.log("try to find main cookie!");
-
-          const ajsCookie = cookies.find(
-            (cookie) => cookie.name === MainCookieName
-          );
-
-          if (!ajsCookie || !ajsCookie.value) {
-            throw new Error(
-              `cookie ${MainCookieName} not found or is null :( \n we try again.`
-            );
-          }
-        } catch (error) {
-          console.log(`Error in L1: ${(error as Error).message}`);
-          retryCountL1++;
-          if (retryCountL1 < MAX_RETRIES_L1) {
-            console.log(`Retrying... (${retryCountL1}/${MAX_RETRIES_L1})`);
-            app(); // try again ..
-            return;
-          } else {
-            console.log("[L1] Max retries reached. Restarting...");
-            throw new Error("L1 dumped");
-          }
-        }
-
-        const cookieString = cookies
-          .map((cookie) => `${cookie.name}=${cookie.value}`)
-          .join(";");
-        console.log(cookieString);
-
-        let solData: string, dogeData: string;
-
-        const sendDataToApi = async (data: any) => {
-          try {
-            const res = await axios.post(
-              this.config.EnvConfig.databasep +
-                this.config.EnvConfig.databasepSave,
-              JSON.stringify(data),
-              {
-                headers: {
-                  Accept: "application/json",
-                  "Content-Type": "application/json",
-                },
-                timeout: 5000,
-              }
-            );
-            console.log("Response:", res.status);
-          } catch (error) {
-            console.log("[Error] sendDataToApi => Axios error!");
-            return;
-            // throw error;
-          }
-        };
-
-        // interface Eval {
-        //   [key: string]: any;
-        // }
-        const processNodes = async (
-          nodes: Array<{ node: string; saveTo: string }>
-        ) => {
-          let dogeTimestamp = null;
-          let solTimestamp = null;
-
-          try {
-            const response = await axios.get(
-              this.config.EnvConfig.databasep +
-                this.config.EnvConfig.databasepGet,
-              {
-                headers: {
-                  Accept: "application/json",
-                  "Content-Type": "application/json",
-                },
-                timeout: 5000,
-              }
-            );
-
-            if (response.status === 200) {
-              let data;
-              data = response.data.data || undefined;
-              dogeTimestamp = data.DOGE || null;
-              solTimestamp = data.SOL || null;
-            } else {
-              throw new Error("Error fetching data from API");
-            }
-          } catch (_) {
-            console.log("Error in getting Timestamp from API!");
-            dogeTimestamp = null;
-            solTimestamp = null;
-          }
-
-          const promises = nodes.map(async ({ node, saveTo }) => {
-            console.log("on:", node);
-            const getData = new GetDataGlassnode(node, cookieString);
-
-            let timeStamp;
-
-            switch (node) {
-              case "SOL":
-                if (!solTimestamp) break;
-                timeStamp = Math.floor(new Date(solTimestamp).getTime() / 1000);
-
-                console.log(`SOL Timestamp: ${timeStamp}`);
-                break;
-
-              case "DOGE":
-                if (!dogeTimestamp) break;
-                timeStamp = Math.floor(
-                  new Date(dogeTimestamp).getTime() / 1000
-                );
-
-                console.log(`DOGE Timestamp: ${timeStamp}`);
-
-                break;
-            }
-
-            let data;
-            if (timeStamp) {
-              data = await getData.getLast(timeStamp);
-            } else {
-              data = await getData.getAll();
-            }
-
-            if (!data) {
-              throw new Error("data is null!");
-            }
-
-            eval(`${saveTo} = JSON.stringify(data)`);
-            // (this as Eval)[saveTo] = JSON.stringify(data);
-
-            console.log("send data to api");
-            if (!this.config.Args.test) {
-              await sendDataToApi(data);
-            }
-
-            console.log("running false");
-            isRunning = false;
-          });
-
-          await Promise.all(promises);
-        };
-
-        const nodes = [
-          { node: "SOL", saveTo: "solData" },
-          { node: "DOGE", saveTo: "dogeData" },
-        ];
-
-        processNodes(nodes).then(() => {
-          console.log("All nodes processed");
-          try {
-            fs.writeFileSync("data-sol.json", solData!);
-            console.log("saved");
-            fs.writeFileSync("data-doge.json", dogeData!);
-            console.log("saved");
-          } catch (_) {
-            console.log("Error in saving data to file!");
-          }
-        });
-      } finally {
-        try {
-          await browser!.close();
-        } catch (_) {
-          console.log("Error in closing browser");
-        }
-      }
-    };
+    const App = new AppClass(this);
 
     const pur = async () => {
       try {
@@ -288,12 +34,12 @@ export class MainCC extends Core {
         await startWarpPlus(port).catch((err: any) => {
           throw new Error(err);
         });
-        await app(port);
+        await App.app(port);
       } catch (error) {
         console.log(`Error in main: ${(error as Error).message}`);
-        retryCount++;
-        if (retryCount < MAX_RETRIES) {
-          console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+        config.retryCount++;
+        if (config.retryCount < MAX_RETRIES) {
+          console.log(`Retrying... (${config.retryCount}/${MAX_RETRIES})`);
           await pur(); // try again ..
         } else {
           console.log("[error] Max retries reached. Aborting... :(");
@@ -310,17 +56,17 @@ export class MainCC extends Core {
         async () => {
           try {
             resetTry();
-            if (isRunning) {
+            if (config.isRunning) {
               console.log(
                 "Previous instance is still running. Skipping this execution."
               );
               return;
             }
 
-            isRunning = true;
+            config.isRunning = true;
 
             setTimeout(async () => {
-              isRunning = false;
+              config.isRunning = false;
               await stopWarpPlus();
             }, 290000);
 
@@ -345,7 +91,7 @@ export class MainCC extends Core {
 
     (async () => {
       if (this.config.Args.test) {
-        await app();
+        await App.app();
       } else {
         StartCron();
       }
