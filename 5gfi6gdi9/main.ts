@@ -16,16 +16,13 @@ import axios from "axios";
 
 import { GetDataGlassnode } from "./Glassnode.js";
 import { findOpenPort, startWarpPlus, stopWarpPlus } from "./exec.js";
-import { DefaultAgent } from "./config.js";
+import { DefaultAgent, HomePage, MainCookieName, MAX_RETRIES, MAX_RETRIES_L1 } from "./config.js";
 
 //--------------------------------------------------------
 let isRunning = false;
 
-const MAX_RETRIES = 5;
 let retryCount = 0;
-
 let retryCountL1 = 0;
-const MAX_RETRIES_L1 = 6;
 
 //--------------------------------------------------------
 function resetTry() {
@@ -55,7 +52,7 @@ new (class extends Core {
 
         await page.deleteCookie(...(await page.cookies()));
         await page.setUserAgent(DefaultAgent);
-        await page.goto("https://studio.glassnode.com/home", {
+        await page.goto(HomePage, {
           waitUntil: "networkidle0",
           timeout: this.config.EnvConfig.timeout,
         });
@@ -113,12 +110,12 @@ new (class extends Core {
           console.log("try to find main cookie!");
 
           const ajsCookie = cookies.find(
-            (cookie) => cookie.name === "ajs_anonymous_id"
+            (cookie) => cookie.name === MainCookieName
           );
 
           if (!ajsCookie || !ajsCookie.value) {
             throw new Error(
-              "cookie ajs_anonymous_id not found or is null :( \n we try again."
+              `cookie ${MainCookieName} not found or is null :( \n we try again.`
             );
           }
         } catch (error) {
