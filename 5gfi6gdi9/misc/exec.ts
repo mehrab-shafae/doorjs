@@ -76,6 +76,7 @@ export function stopWarpPlus(): Promise<void> {
 
     exec(killWarp, async (_) => {
       await delay(KillPortDelay);
+      console.log("STOPPED")
       resolve();
     });
   });

@@ -282,6 +282,7 @@ new (class extends Core {
     const pur = async () => {
       try {
         await stopWarpPlus();
+        console.log("FIND PORT");
         const port = await findOpenPort();
         console.log(`warp on: ${port}`);
         await startWarpPlus(port).catch((err: any) => {
