@@ -1,5 +1,8 @@
+// Glassnode
+
 import axios from "axios";
 import moment from "moment-timezone";
+import { ENDPOINT_GLASSNODE_FEE, ENDPOINT_GLASSNODE_TX, HEADER_GLASSNODE_REQUESTS } from "./config.js";
 
 function convertTimestampToISO(timestampInt: number) {
   return moment
@@ -8,17 +11,6 @@ function convertTimestampToISO(timestampInt: number) {
     .toISOString()
     .replace("+00:00", "Z");
 }
-
-const ENDPOINT_GLASSNODE_TX =
-  "https://api.glassnode.com/v1/metrics/transactions/count";
-const ENDPOINT_GLASSNODE_FEE =
-  "https://api.glassnode.com/v1/metrics/fees/volume_sum";
-const HEADER_GLASSNODE_REQUESTS = {
-  "user-agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0",
-  "sec-ch-ua":
-    '"Not A(Brand";v="8", "Chromium";v="132", "Microsoft Edge";v="132"',
-};
 
 export class GetDataGlassnode {
   symbol: string;
