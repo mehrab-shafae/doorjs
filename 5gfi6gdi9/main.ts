@@ -17,7 +17,7 @@ import { config, resetTry } from "./app/config/index.js";
 export class MainCC extends Core {
   async Main() {
     initConfig(this.config.EnvConfig);
-    const { App: AppClass } = await import('./app/index.js');
+    const { App: AppClass } = await import("./app/index.js");
 
     const App = new AppClass(this);
 
@@ -97,4 +97,4 @@ export class MainCC extends Core {
   //--------------------------------------------------------
 }
 
-new (MainCC)();
+new MainCC();

@@ -1,5 +1,3 @@
-import { MainCC } from "../main.js";
-
 import fs from "fs";
 import axios from "axios";
 
@@ -14,9 +12,12 @@ import {
   MAX_RETRIES_L1,
 } from "../config/index.js";
 import { config } from "./config/index.js";
+import { Core } from "@marboris/core";
 
-export class App extends MainCC {
-  constructor(core: MainCC) {
+export class App extends Core {
+  protected Main(): void {}
+
+  constructor(core: Core) {
     super();
     Object.assign(this, core);
   }
