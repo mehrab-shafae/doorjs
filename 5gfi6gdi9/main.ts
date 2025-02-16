@@ -19,6 +19,7 @@ import { findOpenPort, startWarpPlus, stopWarpPlus } from "./exec.js";
 import {
   DefaultAgent,
   HomePage,
+  initConfig,
   MainCookieName,
   MAX_RETRIES,
   MAX_RETRIES_L1,
@@ -39,6 +40,7 @@ function resetTry() {
 //--------------------------------------------------------
 new (class extends Core {
   Main() {
+    initConfig(this.config.EnvConfig);
     //--------------------------------------------------------
     let cachePort: number | undefined;
     const app = async (warpPort?: number) => {
@@ -60,7 +62,7 @@ new (class extends Core {
         await page.setUserAgent(DefaultAgent);
         await page.goto(HomePage, {
           waitUntil: "networkidle0",
-          timeout: this.config.EnvConfig.timeout,
+          timeout: this.config.EnvConfig.HomePageTimeout,
         });
         await page.reload(); // we need clear cache like ctrl+F5
 

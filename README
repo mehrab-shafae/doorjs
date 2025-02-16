@@ -1,5 +1,6 @@
 ## Web Crawler with Puppeteer
 ## >> IP Changer
+## Only for Linux systems
 
 Build:
     npm i -g yarn typescript && yarn && tsc
