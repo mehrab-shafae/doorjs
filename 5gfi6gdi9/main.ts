@@ -330,7 +330,9 @@ new (class extends Core {
               `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
             );
             await pur();
-          } catch (_) {}
+          } catch (error) {
+            console.log("[Core Error] " + error);
+          }
         },
         {
           scheduled: true,
