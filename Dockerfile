@@ -58,7 +58,7 @@ WORKDIR /home/chromeuser
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/.env ./
-COPY --from=build /app/warp* ./
+COPY --from=build /app/bin ./bin
 
 RUN rm -f package-lock.json
 
