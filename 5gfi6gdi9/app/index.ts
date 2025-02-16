@@ -1,4 +1,4 @@
-import { MainCC } from "5gfi6gdi9/main.js";
+import { MainCC } from "../main.js";
 
 import fs from "fs";
 import axios from "axios";
