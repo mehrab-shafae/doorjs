@@ -9,13 +9,8 @@ import { Core } from "@marboris/core";
 import cron from "node-cron";
 import moment from "moment-timezone";
 
-
-
 import { findOpenPort, startWarpPlus, stopWarpPlus } from "./misc/exec.js";
-import {
-  initConfig,
-  MAX_RETRIES,
-} from "./config/index.js";
+import { initConfig, MAX_RETRIES } from "./config/index.js";
 import { config, resetTry } from "./app/config/index.js";
 import { App as AppClass } from "./app/index.js";
 
