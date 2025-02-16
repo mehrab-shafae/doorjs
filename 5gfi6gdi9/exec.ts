@@ -2,6 +2,7 @@ import { exec, ChildProcess } from "child_process";
 
 import * as net from "net";
 import { delay } from "./misc.js";
+import { killWarp, startWarpCmd } from "./config.js";
 
 //--------------------------------------------------------
 
@@ -12,10 +13,11 @@ let isWarpRunning = false;
 
 export function startWarpPlus(
   port: number,
-  timeout: number = 10000
+  timeout: number = 10000,
+  startDelay: number = 5000
 ): Promise<ChildProcess> {
   return new Promise((resolve, reject) => {
-    const command = `./warp-plus --gool -b 127.0.0.1:${port} -v`;
+    const command = `./${startWarpCmd} 127.0.0.1:${port} -v`;
     childProcess = exec(command);
 
     const timeoutId = setTimeout(async () => {
@@ -27,7 +29,7 @@ export function startWarpPlus(
         isWarpRunning = true;
         clearTimeout(timeoutId);
         console.log(`warp-plus is running on port ${port}`);
-        await delay(5000);
+        await delay(startDelay);
         resolve(childProcess!);
       }
     });
@@ -74,7 +76,7 @@ export function stopWarpPlus(): Promise<void> {
       console.log("warp-plus stopped");
     }
 
-    exec("pkill -f warp-plus", async (_) => {
+    exec(killWarp, async (_) => {
       await delay(3000);
       resolve();
     });

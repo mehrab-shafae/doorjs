@@ -10,3 +10,6 @@ export const HEADER_GLASSNODE_REQUESTS = {
   "sec-ch-ua":
     '"Not A(Brand";v="8", "Chromium";v="132", "Microsoft Edge";v="132"',
 };
+
+export const killWarp = "pkill -f warp-plus";
+export const startWarpCmd = "warp-plus --gool -b";
