@@ -1,8 +1,8 @@
 // Glassnode
 
 import axios from "axios";
-import { ENDPOINT_GLASSNODE_FEE, ENDPOINT_GLASSNODE_TX, HEADER_GLASSNODE_REQUESTS } from "./config/index.js";
-import { convertTimestampToISO } from "./misc/index.js";
+import { ENDPOINT_GLASSNODE_FEE, ENDPOINT_GLASSNODE_TX, HEADER_GLASSNODE_REQUESTS } from "../../config/index.js";
+import { convertTimestampToISO } from "../../misc/index.js";
 
 //--------------------------------------------------------
 export class GetDataGlassnode {

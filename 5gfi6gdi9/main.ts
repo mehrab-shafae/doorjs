@@ -13,7 +13,7 @@ import moment from "moment-timezone";
 import fs from "fs";
 import axios from "axios";
 
-import { GetDataGlassnode } from "./Glassnode.js";
+import { GetDataGlassnode } from "./app/glassnode/index.js";
 import { findOpenPort, startWarpPlus, stopWarpPlus } from "./misc/exec.js";
 import {
   DefaultAgent,
