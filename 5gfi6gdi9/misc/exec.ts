@@ -40,7 +40,7 @@ export function startWarpPlus(
       if (code !== 0) {
         const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
         console.error(`[Error] ${errorMessage}`);
-        await stopWarpPlus();
+        // await stopWarpPlus();
         reject("warp terminated unexpectedly!!");
       }
     });
