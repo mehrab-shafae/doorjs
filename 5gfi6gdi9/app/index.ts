@@ -149,9 +149,10 @@ export class App extends Core {
         }
       };
 
-      // interface Eval {
-      //   [key: string]: any;
-      // }
+      interface Eval {
+        [key: string]: any;
+      }
+
       const processNodes = async (
         nodes: Array<{ node: string; saveTo: string }>
       ) => {
@@ -219,8 +220,8 @@ export class App extends Core {
             throw new Error("data is null!");
           }
 
-          eval(`${saveTo} = JSON.stringify(data)`);
-          // (this as Eval)[saveTo] = JSON.stringify(data);
+          // eval(`${saveTo} = JSON.stringify(data)`);
+          (this as Eval)[saveTo] = JSON.stringify(data);
 
           console.log("send data to api");
           if (!this.config.Args.test) {
