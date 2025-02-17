@@ -22,6 +22,7 @@ export function startWarpPlus(port: number): Promise<ChildProcess> {
     childProcess = exec(command);
 
     const timeoutId = setTimeout(async () => {
+      if(isWarpRunning) return;
       await stopWarpPlus();
     }, WarpTimeout);
 
