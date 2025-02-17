@@ -15,6 +15,7 @@ export const HEADER_GLASSNODE_REQUESTS = {
 
 //--------------------------------------------------------
 export let killWarp = "pkill -f warp-plus";
+export const rmWarpCache = "rm -rf .cache/warp-plus";
 export let startWarpCmd = "bin/warp-plus --gool -b";
 
 //--------------------------------------------------------

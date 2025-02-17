@@ -9,6 +9,7 @@ import {
   WarpStartDelay,
   WarpTimeout,
   MAX_RANDOM_PORT,
+  rmWarpCache,
 } from "../config/index.js";
 
 //--------------------------------------------------------
@@ -22,7 +23,7 @@ export function startWarpPlus(port: number): Promise<ChildProcess> {
     childProcess = exec(command);
 
     const timeoutId = setTimeout(async () => {
-      if(isWarpRunning) return;
+      if (isWarpRunning) return;
       await stopWarpPlus();
     }, WarpTimeout);
 
@@ -46,7 +47,6 @@ export function startWarpPlus(port: number): Promise<ChildProcess> {
       if (code !== 0) {
         const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
         console.error(`[Error] ${errorMessage}`);
-        // await stopWarpPlus();
         reject("warp terminated unexpectedly!!");
       }
     });
@@ -76,14 +76,16 @@ export function findOpenPort(): Promise<number> {
 export function stopWarpPlus(): Promise<void> {
   return new Promise((resolve, _) => {
     if (childProcess) {
-      childProcess.kill();
+      childProcess.kill("SIGINT");
       console.log("warp-plus stopped");
     }
 
-    exec(killWarp, async (_) => {
-      await delay(KillPortDelay);
-      console.log("STOPPED");
-      resolve();
+    exec(killWarp, (_) => {
+      exec(rmWarpCache, async (_error, _stdout, _stderr) => {
+        await delay(KillPortDelay);
+        console.log("STOPPED");
+        resolve();
+      });
     });
   });
 }
