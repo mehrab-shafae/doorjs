@@ -66,6 +66,7 @@ export class MainCC extends Core {
             );
             await pur();
             console.log("running false");
+            config.isRunning = false;
             await WarpManager.stopWarpPlus();
           } catch (error) {
             console.log("[Core Error] " + error);
