@@ -76,13 +76,12 @@ class WarpManager {
 
   public static async stopWarpPlus(): Promise<void> {
     return new Promise((resolve) => {
-      if (this.childProcess) {
-        this.childProcess.kill("SIGINT");
-        console.log("warp-plus stopped");
-      }
-
       exec(killWarp, () => {
         exec(rmWarpCache, async () => {
+          if (this.childProcess) {
+            this.childProcess.kill("SIGINT");
+            console.log("warp-plus stopped");
+          }
           await delay(KillPortDelay);
           console.log("STOPPED");
           resolve();
