@@ -26,9 +26,7 @@ export class MainCC extends Core {
         console.log("FIND PORT");
         const port = await WarpManager.findOpenPort();
         console.log(`warp on: ${port}`);
-        await WarpManager.startWarpPlus(port).catch((err: any) => {
-          throw new Error(err);
-        });
+        await WarpManager.startWarpPlus(port);
         await App.app(port);
       } catch (error) {
         console.log(`Error in main: ${(error as Error).message}`);
