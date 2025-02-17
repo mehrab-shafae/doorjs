@@ -50,6 +50,7 @@ class WarpManager {
         if (code !== 0) {
           if (this.forceWarp) {
             this.forceWarp = false;
+            console.log('[info] Warp forced');
             return;
           }
           const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
