@@ -9,7 +9,7 @@ import { Core } from "@marboris/core";
 import cron from "node-cron";
 import moment from "moment-timezone";
 
-import { findOpenPort, startWarpPlus, stopWarpPlus } from "./misc/exec.js";
+import WarpManager from "./misc/warp.js";
 import { initConfig, MAX_RETRIES } from "./config/index.js";
 import { config, resetTry } from "./app/config/index.js";
 import { App as AppClass } from "./app/index.js";
@@ -22,11 +22,11 @@ export class MainCC extends Core {
 
     const pur = async () => {
       try {
-        await stopWarpPlus();
+        await WarpManager.stopWarpPlus();
         console.log("FIND PORT");
-        const port = await findOpenPort();
+        const port = await WarpManager.findOpenPort();
         console.log(`warp on: ${port}`);
-        await startWarpPlus(port).catch((err: any) => {
+        await WarpManager.startWarpPlus(port).catch((err: any) => {
           throw new Error(err);
         });
         await App.app(port);
@@ -62,7 +62,7 @@ export class MainCC extends Core {
 
             // setTimeout(async () => {
             //   config.isRunning = false;
-            //   await stopWarpPlus();
+            //   await WarpManager.stopWarpPlus();
             // }, 290000);
 
             const timeInUTC = moment()
