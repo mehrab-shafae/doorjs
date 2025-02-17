@@ -60,10 +60,10 @@ export class MainCC extends Core {
 
             config.isRunning = true;
 
-            setTimeout(async () => {
-              config.isRunning = false;
-              await stopWarpPlus();
-            }, 290000);
+            // setTimeout(async () => {
+            //   config.isRunning = false;
+            //   await stopWarpPlus();
+            // }, 290000);
 
             const timeInUTC = moment()
               .utc()
