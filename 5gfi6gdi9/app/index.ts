@@ -239,17 +239,16 @@ export class App extends Core {
         { node: "DOGE", saveTo: "dogeData" },
       ];
 
-      processNodes(nodes).then(() => {
-        console.log("All nodes processed");
-        try {
-          fs.writeFileSync("data-sol.json", solData!);
-          console.log("saved");
-          fs.writeFileSync("data-doge.json", dogeData!);
-          console.log("saved");
-        } catch (_) {
-          console.log("Error in saving data to file!");
-        }
-      });
+      await processNodes(nodes);
+      console.log("All nodes processed");
+      try {
+        fs.writeFileSync("data-sol.json", solData!);
+        console.log("saved");
+        fs.writeFileSync("data-doge.json", dogeData!);
+        console.log("saved");
+      } catch (_) {
+        console.log("Error in saving data to file!");
+      }
     } finally {
       try {
         await browser!.close();
