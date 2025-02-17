@@ -75,7 +75,7 @@ class WarpManager {
       exec(killWarp, () => {
         exec(rmWarpCache, async () => {
           if (this.childProcess) {
-            this.childProcess.kill("SIGINT");
+            this.childProcess.kill("SIGTERM");
             console.log("warp-plus stopped");
           }
           await delay(KillPortDelay);
