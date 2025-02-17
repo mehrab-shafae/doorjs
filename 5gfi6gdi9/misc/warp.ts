@@ -10,6 +10,7 @@ import {
   MAX_RANDOM_PORT,
   rmWarpCache,
 } from "../config/index.js";
+import { config } from "../app/config/index.js";
 
 class WarpManager {
   private static childProcess: ChildProcess | null = null;
@@ -42,6 +43,10 @@ class WarpManager {
       this.childProcess.on("exit", async (code: number) => {
         console.log(`warp-plus exited with code ${code}`);
         this.isWarpRunning = false;
+
+        console.log("running false");
+        config.isRunning = false;
+
         if (code !== 0) {
           const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
           console.error(`[Error] ${errorMessage}`);

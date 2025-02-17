@@ -227,9 +227,6 @@ export class App extends Core {
           if (!this.config.Args.test) {
             await sendDataToApi(data);
           }
-
-          console.log("running false");
-          config.isRunning = false;
         });
 
         await Promise.all(promises);

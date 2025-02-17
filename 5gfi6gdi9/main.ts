@@ -58,11 +58,6 @@ export class MainCC extends Core {
 
             config.isRunning = true;
 
-            // setTimeout(async () => {
-            //   config.isRunning = false;
-            //   await WarpManager.stopWarpPlus();
-            // }, 290000);
-
             const timeInUTC = moment()
               .utc()
               .format(this.config.EnvConfig.UtcFormat);
@@ -70,6 +65,8 @@ export class MainCC extends Core {
               `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
             );
             await pur();
+            console.log("running false");
+            await WarpManager.stopWarpPlus();
           } catch (error) {
             console.log("[Core Error] " + error);
           }
