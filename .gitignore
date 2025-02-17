@@ -10,4 +10,4 @@ log/
 logs/
 *data*json*
 dist/
-/.env
+/.env*
