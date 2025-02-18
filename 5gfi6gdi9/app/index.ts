@@ -246,10 +246,12 @@ export class App extends Core {
       await processNodes(nodes);
       console.log("All nodes processed");
       try {
-        fs.writeFileSync("data-sol.json", solData!);
-        console.log("saved");
-        fs.writeFileSync("data-doge.json", dogeData!);
-        console.log("saved");
+        if(this.config.Args.fast){
+          fs.writeFileSync("data-sol.json", solData!);
+          console.log("saved");
+          fs.writeFileSync("data-doge.json", dogeData!);
+          console.log("saved");
+        }
       } catch (_) {
         console.log("Error in saving data to file!");
       }
