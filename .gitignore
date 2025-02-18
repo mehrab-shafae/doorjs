@@ -12,3 +12,4 @@ logs/
 dist/
 /.env*
 !/.env.example
+*.zip
