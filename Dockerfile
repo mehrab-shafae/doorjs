@@ -60,11 +60,11 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/.env ./
 COPY --from=build /app/bin ./bin
 
-RUN chmod +x ./bin/warp*
-
 RUN rm -f package-lock.json
 
 COPY --chown=chromeuser:chromeuser . .
+
+RUN chmod +x ./bin/warp-plus
 
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 
