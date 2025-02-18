@@ -89,7 +89,6 @@ class WarpManager {
             console.log("warp-plus stopped");
           }
           await delay(KillPortDelay);
-          console.log("STOPPED");
           resolve();
         });
       });

@@ -23,7 +23,6 @@ export class MainCC extends Core {
     const pur = async () => {
       try {
         await WarpManager.stopWarpPlus();
-        console.log("FIND PORT");
         const port = await WarpManager.findOpenPort();
         console.log(`warp on: ${port}`);
         await WarpManager.startWarpPlus(port);
