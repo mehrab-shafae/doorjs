@@ -35,28 +35,28 @@ export let MainCookieName = "ajs_anonymous_id";
 export let MAX_RANDOM_PORT=0;
 //--------------------------------------------------------
 export function initConfig(GEnv: any) {
-  ENDPOINT_GLASSNODE_TX = GEnv.ENDPOINT_GLASSNODE_TX;
-  ENDPOINT_GLASSNODE_FEE = GEnv.ENDPOINT_GLASSNODE_FEE;
+  ENDPOINT_GLASSNODE_TX = GEnv.ENDPOINT_GLASSNODE_TX ?? ENDPOINT_GLASSNODE_TX;
+  ENDPOINT_GLASSNODE_FEE = GEnv.ENDPOINT_GLASSNODE_FEE ?? ENDPOINT_GLASSNODE_FEE;
 
   //--------------------------------------------------------
-  DefaultAgent = GEnv.DefaultAgent;
+  DefaultAgent = GEnv.DefaultAgent ?? DefaultAgent;
   //--------------------------------------------------------
-  killWarp = GEnv.killWarp;
-  startWarpCmd = GEnv.startWarpCmd;
+  killWarp = GEnv.killWarp ?? killWarp;
+  startWarpCmd = GEnv.startWarpCmd ?? startWarpCmd;
 
   //--------------------------------------------------------
-  (WarpTimeout = GEnv.WarpTimeout),
-    (WarpStartDelay = GEnv.WarpStartDelay),
-    (KillPortDelay = GEnv.KillPortDelay);
+  WarpTimeout = GEnv.WarpTimeout ?? WarpTimeout;
+  WarpStartDelay = GEnv.WarpStartDelay ?? WarpStartDelay;
+  KillPortDelay = GEnv.KillPortDelay ?? KillPortDelay;
   //--------------------------------------------------------
-  UnixTimeISOtz = GEnv.UnixTimeISOtz;
-  UnixTimeISOr = GEnv.UnixTimeISOr;
+  UnixTimeISOtz = GEnv.UnixTimeISOtz ?? UnixTimeISOtz;
+  UnixTimeISOr = GEnv.UnixTimeISOr ?? UnixTimeISOr;
   //--------------------------------------------------------
-  MAX_RETRIES = GEnv.MAX_RETRIES;
-  MAX_RETRIES_L1 = GEnv.MAX_RETRIES_L1;
+  MAX_RETRIES = GEnv.MAX_RETRIES ?? MAX_RETRIES;
+  MAX_RETRIES_L1 = GEnv.MAX_RETRIES_L1 ?? MAX_RETRIES_L1;
 
-  HomePage = GEnv.HomePage;
-  MainCookieName = GEnv.MainCookieName;
+  HomePage = GEnv.HomePage ?? HomePage;
+  MainCookieName = GEnv.MainCookieName ?? MainCookieName;
 
-  MAX_RANDOM_PORT = GEnv.MAX_RANDOM_PORT;
+  MAX_RANDOM_PORT = GEnv.MAX_RANDOM_PORT ?? MAX_RANDOM_PORT;
 }
