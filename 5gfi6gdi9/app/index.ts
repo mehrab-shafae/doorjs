@@ -6,10 +6,16 @@ import puppeteer from "puppeteer";
 import { GetDataGlassnode } from "./glassnode/index.js";
 
 import {
+  chrome,
   DefaultAgent,
+  headless,
   HomePage,
+  HomePageTimeout,
   MainCookieName,
   MAX_RETRIES_L1,
+  databasepGet,
+  databasepSave,
+  proxy,
 } from "../config/index.js";
 import { config } from "./config/index.js";
 import { Core } from "@marboris/core";
@@ -29,9 +35,9 @@ export class App extends Core {
     let browser;
     try {
       browser = await puppeteer.launch({
-        headless: this.config.EnvConfig.headless ? true : false,
-        executablePath: this.config.EnvConfig.chrome,
-        ...(this.config.Args.test && !this.config.EnvConfig.proxy
+        headless: headless ? true : false,
+        executablePath: chrome,
+        ...(this.config.Args.test && !proxy
           ? {}
           : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
       });
@@ -43,7 +49,7 @@ export class App extends Core {
       await page.setUserAgent(DefaultAgent);
       await page.goto(HomePage, {
         waitUntil: "networkidle0",
-        timeout: this.config.EnvConfig.HomePageTimeout,
+        timeout: HomePageTimeout,
       });
       await page.reload(); // we need clear cache like ctrl+F5
 
@@ -131,7 +137,7 @@ export class App extends Core {
         try {
           const res = await axios.post(
             this.config.EnvConfig.databasep +
-              this.config.EnvConfig.databasepSave,
+              databasepSave,
             JSON.stringify(data),
             {
               headers: {
@@ -162,7 +168,7 @@ export class App extends Core {
         try {
           const response = await axios.get(
             this.config.EnvConfig.databasep +
-              this.config.EnvConfig.databasepGet,
+              databasepGet,
             {
               headers: {
                 Accept: "application/json",
