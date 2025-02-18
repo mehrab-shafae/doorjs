@@ -10,7 +10,7 @@ import cron from "node-cron";
 import moment from "moment-timezone";
 
 import WarpManager from "./misc/warp.js";
-import { initConfig, MAX_RETRIES } from "./config/index.js";
+import { CRONC, CRONCtest, initConfig, MAX_RETRIES, UnixTimeISOtz, UtcFormat } from "./config/index.js";
 import { config, resetTry } from "./app/config/index.js";
 import { App as AppClass } from "./app/index.js";
 
@@ -42,8 +42,8 @@ export class MainCC extends Core {
 
     const StartCron = () => {
       let timeSc = this.config.Args.fast
-        ? this.config.EnvConfig.CRONCtest
-        : this.config.EnvConfig.CRONC;
+        ? CRONCtest
+        : CRONC;
       cron.schedule(
         timeSc,
         async () => {
@@ -60,7 +60,7 @@ export class MainCC extends Core {
 
             const timeInUTC = moment()
               .utc()
-              .format(this.config.EnvConfig.UtcFormat);
+              .format(UtcFormat);
             console.log(
               `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
             );
@@ -74,7 +74,7 @@ export class MainCC extends Core {
         },
         {
           scheduled: true,
-          timezone: this.config.EnvConfig.UnixTimeISOtz,
+          timezone: UnixTimeISOtz,
         }
       );
       console.log("[info] ~{5}`Cron job scheduled. It will run every night.`");

@@ -21,9 +21,16 @@ Flags:
     debug: show messages to terminal
 """
 
+# Usage
++ chmod +x ./bin/warp*
+
 # Docker
 
 ## Clean
+
+### local
++ rm -rf node_m* *lock* dist
+
 + docker builder prune -a
 + docker stop djs2
 + docker rm $(docker ps -aq) && docker rmi $(docker images -q)

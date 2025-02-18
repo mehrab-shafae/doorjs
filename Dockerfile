@@ -60,6 +60,8 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/.env ./
 COPY --from=build /app/bin ./bin
 
+RUN chmod +x ./bin/warp*
+
 RUN rm -f package-lock.json
 
 COPY --chown=chromeuser:chromeuser . .
@@ -68,5 +70,6 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true
 
 RUN npm install --only=production
 
-# For test add : , "--test", "--fast"
-CMD ["node", "dist/main.js", "--debug", "--fast"]
+# For test add: "--test", "--fast"
+ENTRYPOINT ["node", "dist/main.js"]
+CMD ["--debug", "--fast"]
