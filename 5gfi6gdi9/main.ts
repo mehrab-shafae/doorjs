@@ -23,7 +23,7 @@ import { App as AppClass } from "./app/index.js";
 
 //--------------------------------------------------------
 export class MainCC extends Core {
-  async Main() {
+  Main() {
     initConfig(this.config.EnvConfig);
 
     const pur = async () => {
@@ -84,7 +84,7 @@ export class MainCC extends Core {
       console.log("[info] ~{5}`Cron job scheduled. It will run every night.`");
     };
 
-    (async () => {
+    const app = async () => {
       if (this.config.Args.test) {
         const App = new AppClass(this);
 
@@ -94,7 +94,8 @@ export class MainCC extends Core {
       } else {
         StartCron();
       }
-    })();
+    };
+    app();
     //--------------------------------------------------------
   }
   //--------------------------------------------------------
