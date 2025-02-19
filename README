@@ -26,22 +26,25 @@ Flags:
 
 # Docker
 
+```
 ## Clean
 
 ### local
-+ rm -rf node_m* *lock* dist
+rm -rf node_m* *lock* dist
 
-+ docker builder prune -a
-+ docker stop djs2
-+ docker rm $(docker ps -aq) && docker rmi $(docker images -q)
+docker builder prune -a
+docker stop djs2
+docker rm djs2
+docker rmi $(docker images -q)
 
 ## Build && Run
-+ docker build -t djs2 . && docker run --name djs2 --network host --privileged --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -d --restart unless-stopped djs2
+docker build -t djs2 . && docker run --name djs2 --network host --privileged --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -d --restart unless-stopped djs2
 
 ## Logs
-+ docker logs -f djs2
+docker logs -f djs2
 
 ## Depressed
-+ sudo docker build -t doorjs .
-+ sudo docker run --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -it --rm doorjs
-+ sudo docker run --name doorjs --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -it doorjs
+sudo docker build -t doorjs .
+sudo docker run --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -it --rm doorjs
+sudo docker run --name doorjs --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -it doorjs
+```
