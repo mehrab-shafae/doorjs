@@ -16,9 +16,9 @@ USER auruser
 WORKDIR /home/auruser
 
 RUN git clone https://aur.archlinux.org/yay-bin.git && \
-    cd yay && \
+    cd yay-bin && \
     makepkg -si --noconfirm && \
-    rm -rf yay
+    rm -rf yay-bin
 
 USER root
 

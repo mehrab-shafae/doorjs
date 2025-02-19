@@ -32,9 +32,9 @@ Flags:
 ### local
 rm -rf node_m* *lock* dist
 
-docker builder prune -a
 docker stop djs2
 docker rm djs2
+docker builder prune -a
 docker rmi $(docker images -q)
 
 ## Build && Run
