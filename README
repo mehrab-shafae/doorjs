@@ -6,7 +6,7 @@ Build:
     npm i -g yarn typescript && yarn && tsc
 
 Test on local:
-    node . --debug --test --fast
+    node . --debug --test
 
 Test on server:
     node . --debug --fast
@@ -16,8 +16,8 @@ Prod:
 
 """
 Flags:
-    fast: skip send to api
-    test: skip cron job
+    fast
+    test
     debug: show messages to terminal
 """
 
