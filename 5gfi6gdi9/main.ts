@@ -1,7 +1,7 @@
 // on the core ;)
 // by S-MRB-S
 
-process.stdin.resume(); // the program will not close instantly
+// process.stdin.resume(); // the program will not close instantly
 
 //--------------------------------------------------------
 import { Core } from "@marboris/core";
@@ -84,7 +84,7 @@ export class MainCC extends Core {
       console.log("[info] ~{5}`Cron job scheduled. It will run every night.`");
     };
 
-    const app = async () => {
+    (async () => {
       if (this.config.Args.test) {
         const App = new AppClass(this);
 
@@ -94,8 +94,7 @@ export class MainCC extends Core {
       } else {
         StartCron();
       }
-    };
-    app();
+    })();
     //--------------------------------------------------------
   }
   //--------------------------------------------------------
