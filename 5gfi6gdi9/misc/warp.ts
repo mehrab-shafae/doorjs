@@ -22,7 +22,7 @@ class WarpManager {
 
       const timeoutId = setTimeout(async () => {
         if (this.isWarpRunning) return;
-        await this.stopWarpPlus(false);
+        await this.stopWarpPlus();
       }, WarpTimeout);
 
       this.childProcess.stdout?.on("data", async (data: string) => {
@@ -73,7 +73,7 @@ class WarpManager {
     });
   }
 
-  public static async stopWarpPlus(forceWarp: boolean = true): Promise<void> {
+  public static async stopWarpPlus(): Promise<void> {
     return new Promise((resolve) => {
       exec(killWarp, () => {
         exec(rmWarpCache, async () => {
