@@ -45,8 +45,6 @@ export class App extends Core {
           ? (!this.config.Args.test ? { args: ["--proxy-server=http://127.0.0.1:" + App.cachePort] } : {})
           : {}),
       };
-      console.log(configB)
-
       browser = await puppeteer.launch(configB);
 
       console.log("Puppeteer is starting...");
@@ -213,7 +211,6 @@ export class App extends Core {
               timeStamp = Math.floor(new Date(dogeTimestamp).getTime() / 1000);
 
               console.log(`DOGE Timestamp: ${timeStamp}`);
-
               break;
           }
 
