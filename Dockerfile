@@ -10,10 +10,17 @@ RUN pacman -Syu --noconfirm && \
     npm \
     && pacman -Scc --noconfirm
 
-RUN git clone https://aur.archlinux.org/yay-bin.git /tmp/yay && \
-    cd /tmp/yay && \
+RUN useradd -m auruser
+
+USER auruser
+WORKDIR /home/auruser
+
+RUN git clone https://aur.archlinux.org/yay-bin.git && \
+    cd yay && \
     makepkg -si --noconfirm && \
-    rm -rf /tmp/yay
+    rm -rf yay
+
+USER root
 
 RUN yay -S --noconfirm google-chrome
 
@@ -38,4 +45,4 @@ RUN npm run build
 RUN chmod +x ./bin/warp-plus
 
 ENTRYPOINT ["node", "dist/main.js", "--debug"]
-CMD ["--fast"]
+CMD []
