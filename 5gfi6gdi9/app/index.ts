@@ -34,6 +34,7 @@ export class App extends Core {
     if (!cachePort) cachePort = warpPort || undefined;
     let browser;
     try {
+      console.log(proxy)
       const configB: any = {
         headless: headless ? true : false,
         executablePath: chrome,
