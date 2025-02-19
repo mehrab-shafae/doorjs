@@ -37,7 +37,7 @@ export class App extends Core {
       const configB: any = {
         headless: headless ? true : false,
         executablePath: chrome,
-        ...(this.config.Args.test || !proxy
+        ...(!proxy || this.config.Args.test
           ? {}
           : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
       };
