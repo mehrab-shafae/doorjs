@@ -38,9 +38,9 @@ export class App extends Core {
       const configB: any = {
         headless: headless ? true : false,
         executablePath: chrome,
-        ...(!proxy
-          ? {}
-          : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
+        ...(proxy
+          ? { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }
+          : {}),
       };
       console.log(configB);
       browser = await puppeteer.launch(configB);
