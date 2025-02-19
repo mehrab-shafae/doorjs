@@ -45,6 +45,7 @@ export class App extends Core {
           ? { args: ["--proxy-server=http://127.0.0.1:" + App.cachePort] }
           : {}),
       };
+      console.log(config)
 
       browser = await puppeteer.launch(configB);
 
