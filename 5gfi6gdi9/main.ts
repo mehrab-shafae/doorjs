@@ -1,8 +1,6 @@
 // on the core ;)
 // by S-MRB-S
 
-// process.stdin.resume(); // the program will not close instantly
-
 //--------------------------------------------------------
 import { Core } from "@marboris/core";
 
