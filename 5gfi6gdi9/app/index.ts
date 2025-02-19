@@ -28,10 +28,16 @@ export class App extends Core {
     Object.assign(this, core);
   }
 
-  public async app(warpPort?: number) {
+  private static cachePort: number | undefined;
+
+  public static setPort(warpPort: number) {
+    App.cachePort = warpPort;
+  }
+
+  public async app() {
     //--------------------------------------------------------
-    let cachePort: number | undefined;
-    if (!cachePort) cachePort = warpPort || undefined;
+    // if (!App.cachePort) App.cachePort = warpPort || undefined;
+
     let browser;
     try {
       console.log(proxy)
@@ -39,10 +45,10 @@ export class App extends Core {
         headless: headless ? true : false,
         executablePath: chrome,
         ...(proxy === 1
-          ? { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }
+          ? { args: ["--proxy-server=http://127.0.0.1:" + App.cachePort] }
           : {}),
       };
-      console.log(configB);
+
       browser = await puppeteer.launch(configB);
 
       console.log("Puppeteer is starting...");
@@ -230,7 +236,6 @@ export class App extends Core {
           }
 
           eval(`${saveTo} = JSON.stringify(data)`);
-          // (this as Eval)[saveTo] = JSON.stringify(data);
 
           console.log("send data to api");
           await sendDataToApi(data);
