@@ -84,7 +84,7 @@ class WarpManager {
       exec(killWarp, () => {
         exec(rmWarpCache, async () => {
           if (this.childProcess) {
-            // this.forceWarp = forceWarp;
+            this.forceWarp = forceWarp;
             this.childProcess.kill("SIGTERM");
             console.log("warp-plus stopped");
           }

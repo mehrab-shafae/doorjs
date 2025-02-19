@@ -85,10 +85,7 @@ export class MainCC extends Core {
     (async () => {
       if (this.config.Args.test) {
         const App = new AppClass(this);
-
-        console.log('run')
         await App.app();
-        console.log('end')
       } else {
         StartCron();
       }
