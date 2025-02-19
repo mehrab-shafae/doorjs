@@ -34,13 +34,15 @@ export class App extends Core {
     if (!cachePort) cachePort = warpPort || undefined;
     let browser;
     try {
-      browser = await puppeteer.launch({
+      const configB: any = {
         headless: headless ? true : false,
         executablePath: chrome,
         ...(this.config.Args.test && !proxy
           ? {}
           : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
-      });
+      };
+      console.log(configB);
+      browser = await puppeteer.launch(configB);
 
       console.log("Puppeteer is starting...");
       const page = await browser.newPage();
