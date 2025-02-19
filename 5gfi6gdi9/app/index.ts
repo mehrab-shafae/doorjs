@@ -42,7 +42,7 @@ export class App extends Core {
         headless: headless ? true : false,
         executablePath: chrome,
         ...(proxy === 1
-          ? { args: ["--proxy-server=http://127.0.0.1:" + App.cachePort] }
+          ? (!this.config.Args.test ? { args: ["--proxy-server=http://127.0.0.1:" + App.cachePort] } : {})
           : {}),
       };
       console.log(configB)
