@@ -260,7 +260,9 @@ export class App extends Core {
       }
     } finally {
       try {
+        console.log("Closing browser..");
         await browser!.close();
+        console.log("Browser closed!")
       } catch (_) {
         console.log("Error in closing browser");
       }
