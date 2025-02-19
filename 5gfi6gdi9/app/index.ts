@@ -80,10 +80,10 @@ export class App extends Core {
       await new Promise((resolve) => setTimeout(resolve, 8000));
 
       try {
-        await page.type('input[name="email"]', this.config.EnvConfig.email);
+        await page.type('input[name="email"]', this.config.EnvConfig.EMAIL_GLASSNODE);
         await page.type(
           'input[name="current-password"]',
-          this.config.EnvConfig.password
+          this.config.EnvConfig.PASSWORD_GLASSNODE
         );
 
         console.log("We try login...");
@@ -141,7 +141,7 @@ export class App extends Core {
       const sendDataToApi = async (data: any) => {
         try {
           const res = await axios.post(
-            this.config.EnvConfig.databasep +
+            this.config.EnvConfig.DATABASE_FUNDAMENTAL +
               databasepSave,
             JSON.stringify(data),
             {
@@ -167,7 +167,7 @@ export class App extends Core {
 
         try {
           const response = await axios.get(
-            this.config.EnvConfig.databasep +
+            this.config.EnvConfig.DATABASE_FUNDAMENTAL +
               databasepGet,
             {
               headers: {
