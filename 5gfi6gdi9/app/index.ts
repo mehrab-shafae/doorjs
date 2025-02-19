@@ -37,9 +37,9 @@ export class App extends Core {
       const configB: any = {
         headless: headless ? true : false,
         executablePath: chrome,
-        ...(proxy && !this.config.Args.test)
-        ? { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }
-        : {},
+        ...(!proxy
+          ? {}
+          : { args: ["--proxy-server=http://127.0.0.1:" + cachePort] }),
       };
       console.log(configB);
       browser = await puppeteer.launch(configB);
@@ -232,9 +232,7 @@ export class App extends Core {
           (this as Eval)[saveTo] = JSON.stringify(data);
 
           console.log("send data to api");
-          if (!this.config.Args.test) {
-            await sendDataToApi(data);
-          }
+          await sendDataToApi(data);
         });
 
         await Promise.all(promises);
