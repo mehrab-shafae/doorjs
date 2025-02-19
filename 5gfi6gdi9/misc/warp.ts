@@ -14,7 +14,7 @@ import {
 class WarpManager {
   private static childProcess: ChildProcess | null = null;
   private static isWarpRunning = false;
-  private static forceWarp = false;
+  // private static forceWarp = false;
 
   public static async startWarpPlus(port: number): Promise<ChildProcess> {
     return new Promise((resolve, reject) => {
@@ -48,11 +48,11 @@ class WarpManager {
         this.isWarpRunning = false;
 
         if (code !== 0) {
-          if (this.forceWarp) {
-            this.forceWarp = false;
-            console.log('[info] Warp forced');
-            return;
-          }
+          // if (this.forceWarp) {
+          //   this.forceWarp = false;
+          //   console.log('[info] Warp forced');
+          //   return;
+          // }
           const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
           console.error(`[Error] ${errorMessage}`);
           reject("warp terminated unexpectedly!!");
@@ -84,7 +84,7 @@ class WarpManager {
       exec(killWarp, () => {
         exec(rmWarpCache, async () => {
           if (this.childProcess) {
-            this.forceWarp = forceWarp;
+            // this.forceWarp = forceWarp;
             this.childProcess.kill("SIGTERM");
             console.log("warp-plus stopped");
           }
