@@ -229,8 +229,8 @@ export class App extends Core {
             throw new Error("data is null!");
           }
 
-          // eval(`${saveTo} = JSON.stringify(data)`);
-          (this as Eval)[saveTo] = JSON.stringify(data);
+          eval(`${saveTo} = JSON.stringify(data)`);
+          // (this as Eval)[saveTo] = JSON.stringify(data);
 
           console.log("send data to api");
           await sendDataToApi(data);
