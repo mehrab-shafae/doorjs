@@ -38,7 +38,7 @@ docker rmi $(docker images -q)
 docker builder prune -a
 
 ## Build && Run
-docker build -t djs2 . && docker run --name djs2 --network host --privileged --cap-add=SYS_ADMIN -d djs2
+docker build -t djs2 . && docker run --name djs2 --cap-add=SYS_ADMIN -d djs2
 
 ## Logs
 docker logs -f djs2
