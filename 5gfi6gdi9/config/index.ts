@@ -41,7 +41,7 @@ export let databasepSave: string = "/feed/";
 export let databasepGet: string = "/feed/all_symbols/last_timestamps";
 
 export let CRONC: string = "30 5 * * *";
-export let CRONCtest: string = "*/3 * * * *";
+export let CRONCtest: string = "*/2 * * * *";
 
 export let UtcFormat: string = "YYYY-MM-DD HH:mm:ss";
 //--------------------------------------------------------
