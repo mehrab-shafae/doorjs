@@ -157,13 +157,8 @@ export class App extends Core {
         } catch (error) {
           console.log("[Error] sendDataToApi => Axios error!");
           return;
-          // throw error;
         }
       };
-
-      interface Eval {
-        [key: string]: any;
-      }
 
       const processNodes = async (
         nodes: Array<{ node: string; saveTo: string }>
