@@ -2,6 +2,8 @@
 // by S-MRB-S
 
 //--------------------------------------------------------
+process.stdin.resume();
+
 import { Core } from "@marboris/core";
 
 import cron from "node-cron";
@@ -24,6 +26,37 @@ export class MainCC extends Core {
   Main() {
     initConfig(this.config.EnvConfig);
 
+    function exitHandler(options: any, exitCode: any) {
+      console.log("exit handler called");
+      if (options.cleanup) console.log("clean");
+
+      // try {
+      //   stopWarpPlus()
+      //     .then(() => {
+      // if (exitCode || exitCode === 0) console.log(exitCode);
+      //       if (options.exit) process.exit();
+      //     })
+      //     .catch((error) => {
+      //       console.error(`[Error] ${error.message}`);
+      //       if (options.exit) process.exit();
+      //     });
+      // } catch (_) {}
+    }
+
+    //--------------------------------------------------------
+
+    // do something when app is closing
+    // process.on("exit", exitHandler.bind(null, { cleanup: true }));
+
+    // catches ctrl+c event
+    // process.on("SIGINT", exitHandler.bind(null, { exit: true }));
+
+    // catches "kill pid" (for example: nodemon restart)
+    // process.on("SIGUSR1", exitHandler.bind(null, { exit: true }));
+    // process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
+
+    process.on("uncaughtException", exitHandler.bind(null, { exit: true }));
+
     const pur = async () => {
       try {
         const App = new AppClass(this);
@@ -31,7 +64,10 @@ export class MainCC extends Core {
         await WarpManager.stopWarpPlus();
         const port = await WarpManager.findOpenPort();
         console.log(`warp on: ${port}`);
-        await WarpManager.startWarpPlus(port);
+        function Panic() {
+          throw new Error("Panic called");
+        }
+        await WarpManager.startWarpPlus(port, Panic);
         AppClass.setPort(port);
         await App.app();
       } catch (error) {

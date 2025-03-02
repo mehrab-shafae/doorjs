@@ -11,11 +11,16 @@ import {
   rmWarpCache,
 } from "./config.js";
 
+type Panic = () => void;
+
 class WarpManager {
   private static childProcess: ChildProcess | null | undefined = null;
   private static isWarpRunning = false;
 
-  public static async startWarpPlus(port: number): Promise<ChildProcess> {
+  public static async startWarpPlus(
+    port: number,
+    panic: Panic
+  ): Promise<ChildProcess> {
     return new Promise((resolve, reject) => {
       const command = `./${startWarpCmd} 127.0.0.1:${port} -v`;
       this.childProcess = exec(command);
@@ -39,18 +44,19 @@ class WarpManager {
       });
 
       this.childProcess.stderr?.on("data", (data: string) => {
-        console.error(`[Error] warp-plus stderr: ${data}`);
+        console.log(`[Error] warp-plus stderr: ${data}`);
       });
 
       this.childProcess.on("exit", async (code: number) => {
         console.log(`warp-plus exited with code ${code}`);
         this.isWarpRunning = false;
 
-        if (code !== 0) {
-          const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
-          console.error(`[Error] ${errorMessage}`);
-          reject("warp terminated unexpectedly!!");
-        }
+        // if (code !== 0) {
+        const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
+        console.log(`[Error] ${errorMessage}`);
+        panic();
+        reject(new Error("warp terminated unexpectedly!!"));
+        // }
       });
     });
   }
