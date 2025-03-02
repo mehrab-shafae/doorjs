@@ -3,7 +3,7 @@ import axios from "axios";
 
 import puppeteer from "puppeteer";
 
-import { GetDataGlassnode } from "./glassnode/index.js";
+import { GetDataGlassnode } from "./glassnode-getter.js";
 
 import {
   chrome,
@@ -16,8 +16,8 @@ import {
   databasepGet,
   databasepSave,
   proxy,
-} from "../config/index.js";
-import { config } from "./config/index.js";
+} from "../config.js";
+import { config } from "./app-config.js";
 import { Core } from "@marboris/core";
 
 export class App extends Core {

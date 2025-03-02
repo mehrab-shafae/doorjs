@@ -7,7 +7,7 @@ import { Core } from "@marboris/core";
 import cron from "node-cron";
 import moment from "moment-timezone";
 
-import WarpManager from "./misc/warp.js";
+import WarpManager from "./warp-manager.js";
 import {
   CRONC,
   CRONCtest,
@@ -15,9 +15,9 @@ import {
   MAX_RETRIES,
   UnixTimeISOtz,
   UtcFormat,
-} from "./config/index.js";
-import { config, resetTry } from "./app/config/index.js";
-import { App as AppClass } from "./app/index.js";
+} from "./config.js";
+import { config, resetTry } from "./app/app-config.js";
+import { App as AppClass } from "./app/app.js";
 
 //--------------------------------------------------------
 export class MainCC extends Core {
