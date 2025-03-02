@@ -23,9 +23,8 @@ import { Core } from "@marboris/core";
 export class App extends Core {
   protected Main(): void {}
 
-  constructor(core: Core) {
+  constructor() {
     super();
-    Object.assign(this, core);
   }
 
   private static cachePort: number | undefined;
@@ -253,6 +252,7 @@ export class App extends Core {
       }
     } finally {
       try {
+        console.log("[info app] browser closed.")
         await browser!.close();
       } catch (_) {
         console.log("Error in closing browser");
