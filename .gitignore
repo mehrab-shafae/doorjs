@@ -1,0 +1,15 @@
+node_modules/
+chrome/*
+!chrome/*.md
+!chrome/*.js
+yarn.lock
+*.png
+*lock*
+*.py
+log/
+logs/
+*data*json*
+dist/
+/.env*
+!/.env.example
+*.zip

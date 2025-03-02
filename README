@@ -1,0 +1,50 @@
+## Web Crawler with Puppeteer
+## >> IP Changer
+## Only for Linux systems
+
+Build:
+    npm i -g yarn typescript && yarn && tsc
+
+Test on local:
+    node . --debug --test
+
+Test on server:
+    node . --debug --fast
+
+Prod:
+    node . --debug
+
+"""
+Flags:
+    fast
+    test
+    debug: show messages to terminal
+"""
+
+# Usage
++ chmod +x ./bin/warp*
+
+# Docker
+
+```
+## Clean
+
+### local
+rm -rf node_m* *lock* dist
+
+docker stop djs2
+docker rm djs2
+docker rmi $(docker images -q)
+docker builder prune -a
+
+## Build && Run
+docker build -t djs2 . && docker run --name djs2 --cap-add=SYS_ADMIN -d djs2
+
+## Logs
+docker logs -f djs2
+
+## Depressed
+sudo docker build -t doorjs .
+sudo docker run --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -it --rm doorjs
+sudo docker run --name doorjs --cap-add=SYS_ADMIN --security-opt seccomp=unconfined -it doorjs
+```
