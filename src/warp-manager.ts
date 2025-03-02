@@ -1,6 +1,6 @@
 import { exec, ChildProcess } from "child_process";
 import * as net from "net";
-import { delay } from "./index.js";
+import { delay } from "./misc/index.js";
 import {
   killWarp,
   KillPortDelay,
@@ -9,7 +9,7 @@ import {
   WarpTimeout,
   MAX_RANDOM_PORT,
   rmWarpCache,
-} from "../config/index.js";
+} from "./config.js";
 
 class WarpManager {
   private static childProcess: ChildProcess | null | undefined = null;

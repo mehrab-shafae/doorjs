@@ -1,5 +1,5 @@
 import moment from "moment-timezone";
-import { UnixTimeISOr, UnixTimeISOtz } from "../config/index.js";
+import { UnixTimeISOr, UnixTimeISOtz } from "../config.js";
 
 //--------------------------------------------------------
 export function delay(ms: number): Promise<void> {

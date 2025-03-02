@@ -1,7 +1,7 @@
-import { cwd } from '../misc/cwd.js';
+import { cwd } from './misc/cwd.js';
 import * as fs from 'fs';
 
-const config = JSON.parse(fs.readFileSync(cwd('', 'config.js'), 'utf-8'));
+const config = JSON.parse(fs.readFileSync(cwd('', 'config.json'), 'utf-8'));
 
 export let ENDPOINT_GLASSNODE_TX = config.ENDPOINT_GLASSNODE_TX;
 export let ENDPOINT_GLASSNODE_FEE = config.ENDPOINT_GLASSNODE_FEE;
