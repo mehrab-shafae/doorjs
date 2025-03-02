@@ -1,0 +1,19 @@
+# Docker
+
+```
+## Clean
+
+### local
+rm -rf node_m* *lock* dist
+
+docker stop doorjs
+docker rm doorjs
+docker rmi $(docker images -q)
+docker builder prune -a
+
+## Build && Run
+docker build -t doorjs . && docker run --name doorjs --cap-add=SYS_ADMIN -d doorjs
+
+## Logs
+docker logs -f doorjs
+```
