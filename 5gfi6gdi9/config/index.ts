@@ -1,49 +1,44 @@
-//--------------------------------------------------------
-export let ENDPOINT_GLASSNODE_TX =
-  "https://api.glassnode.com/v1/metrics/transactions/count";
-export let ENDPOINT_GLASSNODE_FEE =
-  "https://api.glassnode.com/v1/metrics/fees/volume_sum";
-//--------------------------------------------------------
-export let DefaultAgent =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0";
-export const HEADER_GLASSNODE_REQUESTS = {
-  "user-agent": DefaultAgent,
-  "sec-ch-ua":
-    '"Not A(Brand";v="8", "Chromium";v="132", "Microsoft Edge";v="132"',
-};
-//--------------------------------------------------------
-export let killWarp = "pkill -f warp-plus";
-export const rmWarpCache = "rm -rf .cache/warp-plus";
-export let startWarpCmd = "bin/warp-plus --gool -b";
-//--------------------------------------------------------
-export let WarpTimeout: number = 10000,
-  WarpStartDelay: number = 5000,
-  KillPortDelay: number = 3000;
-//--------------------------------------------------------
-export let UnixTimeISOtz = "UTC";
-export let UnixTimeISOr = "Z";
-//--------------------------------------------------------
-export let MAX_RETRIES = 5;
-export let MAX_RETRIES_L1 = 6;
+import config from './config.json';
 
-export let HomePage = "https://studio.glassnode.com/home";
-export let MainCookieName = "ajs_anonymous_id";
+export let ENDPOINT_GLASSNODE_TX = config.ENDPOINT_GLASSNODE_TX;
+export let ENDPOINT_GLASSNODE_FEE = config.ENDPOINT_GLASSNODE_FEE;
 
-export let MAX_RANDOM_PORT = 65535;
-//--------------------------------------------------------
-export let HomePageTimeout: number = 90000;
-export let chrome: string = "/usr/bin/google-chrome-stable";
+export let DefaultAgent = config.DefaultAgent;
+export const HEADER_GLASSNODE_REQUESTS = config.HEADER_GLASSNODE_REQUESTS;
 
-export let headless: number = 1;
-export let proxy: number = 1;
+export let killWarp = config.killWarp;
+export const rmWarpCache = config.rmWarpCache;
+export let startWarpCmd = config.startWarpCmd;
 
-export let databasepSave: string = "/feed/";
-export let databasepGet: string = "/feed/all_symbols/last_timestamps";
+export let WarpTimeout: number = config.WarpTimeout;
+export let WarpStartDelay: number = config.WarpStartDelay;
+export let KillPortDelay: number = config.KillPortDelay;
 
-export let CRONC: string = "30 5 * * *";
-export let CRONCtest: string = "*/2 * * * *";
+export let UnixTimeISOtz = config.UnixTimeISOtz;
+export let UnixTimeISOr = config.UnixTimeISOr;
 
-export let UtcFormat: string = "YYYY-MM-DD HH:mm:ss";
+export let MAX_RETRIES = config.MAX_RETRIES;
+export let MAX_RETRIES_L1 = config.MAX_RETRIES_L1;
+
+export let HomePage = config.HomePage;
+export let MainCookieName = config.MainCookieName;
+
+export let MAX_RANDOM_PORT = config.MAX_RANDOM_PORT;
+
+export let HomePageTimeout: number = config.HomePageTimeout;
+export let chrome: string = config.chrome;
+
+export let headless: number = config.headless;
+export let proxy: number = config.proxy;
+
+export let databasepSave: string = config.databasepSave;
+export let databasepGet: string = config.databasepGet;
+
+export let CRONC: string = config.CRONC;
+export let CRONCtest: string = config.CRONCtest;
+
+export let UtcFormat: string = config.UtcFormat;
+
 //--------------------------------------------------------
 export function initConfig(GEnv: any) {
   ENDPOINT_GLASSNODE_TX = GEnv.ENDPOINT_GLASSNODE_TX ?? ENDPOINT_GLASSNODE_TX;

@@ -141,7 +141,7 @@ export class App extends Core {
       const sendDataToApi = async (data: any) => {
         try {
           const res = await axios.post(
-            this.config.EnvConfig.DATABASE_FUNDAMENTAL +
+            this.config.EnvConfig.FUNDAMENTAL_API +
               databasepSave,
             JSON.stringify(data),
             {
@@ -167,7 +167,7 @@ export class App extends Core {
 
         try {
           const response = await axios.get(
-            this.config.EnvConfig.DATABASE_FUNDAMENTAL +
+            this.config.EnvConfig.FUNDAMENTAL_API +
               databasepGet,
             {
               headers: {
