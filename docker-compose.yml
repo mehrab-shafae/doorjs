@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  doorjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    cap_add:
+      - SYS_ADMIN

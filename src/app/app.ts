@@ -12,26 +12,16 @@ import {
   HomePage,
   HomePageTimeout,
   MainCookieName,
-  MAX_RETRIES_L1,
   databasepGet,
   databasepSave,
   proxy,
 } from "../config.js";
-import { config } from "./app-config.js";
-import { Core } from "@marboris/core";
 
-export class App extends Core {
-  protected Main(): void {}
+export abstract class App extends GetDataGlassnode {
+  private cachePort: number | undefined;
 
-  constructor(core: Core) {
-    super();
-    Object.assign(this, core);
-  }
-
-  private static cachePort: number | undefined;
-
-  public static setPort(warpPort: number) {
-    App.cachePort = warpPort;
+  public setPort(warpPort: number) {
+    this.cachePort = warpPort;
   }
 
   public async app() {
@@ -42,7 +32,9 @@ export class App extends Core {
         headless: headless ? true : false,
         executablePath: chrome,
         ...(proxy === 1
-          ? (!this.config.Args.test ? { args: ["--proxy-server=http://127.0.0.1:" + App.cachePort] } : {})
+          ? !this.config.Args.test
+            ? { args: ["--proxy-server=http://127.0.0.1:" + this.cachePort] }
+            : {}
           : {}),
       };
       browser = await puppeteer.launch(configB);
@@ -61,74 +53,38 @@ export class App extends Core {
       console.log("We load the Glassnode site.. 8s waiting.");
       await new Promise((resolve) => setTimeout(resolve, 8000));
 
-      try {
-        await page.click('button[data-cy="login-btn"]');
-      } catch (error) {
-        console.log(`Error in L1: ${(error as Error).message}`);
-        config.retryCountL1++;
-        if (config.retryCountL1 < MAX_RETRIES_L1) {
-          console.log(`Retrying... (${config.retryCountL1}/${MAX_RETRIES_L1})`);
-          this.app(); // try again ..
-          return;
-        } else {
-          console.log("[L1] Max retries reached. Restarting...");
-          throw new Error("L1 dumped");
-        }
-      }
+      await page.click('button[data-cy="login-btn"]');
 
       console.log("Login button founded ! we sleep 8s more..");
       await new Promise((resolve) => setTimeout(resolve, 8000));
 
-      try {
-        await page.type('input[name="email"]', this.config.EnvConfig.EMAIL_GLASSNODE);
-        await page.type(
-          'input[name="current-password"]',
-          this.config.EnvConfig.PASSWORD_GLASSNODE
-        );
+      await page.type(
+        'input[name="email"]',
+        this.config.EnvConfig.EMAIL_GLASSNODE
+      );
+      await page.type(
+        'input[name="current-password"]',
+        this.config.EnvConfig.PASSWORD_GLASSNODE
+      );
 
-        console.log("We try login...");
-        await page.click("button.MuiButton-containedPrimary");
-      } catch (error) {
-        console.log(`Error in L1: ${(error as Error).message}`);
-        config.retryCountL1++;
-        if (config.retryCountL1 < MAX_RETRIES_L1) {
-          console.log(`Retrying... (${config.retryCountL1}/${MAX_RETRIES_L1})`);
-          this.app(); // try again ..
-          return;
-        } else {
-          console.log("[L1] Max retries reached. Restarting...");
-          throw new Error("L1 dumped");
-        }
-      }
+      console.log("We try login...");
+      await page.click("button.MuiButton-containedPrimary");
 
       console.log("We login :D ! We 20s waiting for cookies.");
       await new Promise((resolve) => setTimeout(resolve, 20000));
 
       const cookies = await page.cookies();
 
-      try {
-        console.log("try to find main cookie!");
+      console.log("try to find main cookie!");
 
-        const ajsCookie = cookies.find(
-          (cookie) => cookie.name === MainCookieName
+      const ajsCookie = cookies.find(
+        (cookie) => cookie.name === MainCookieName
+      );
+
+      if (!ajsCookie || !ajsCookie.value) {
+        throw new Error(
+          `cookie ${MainCookieName} not found or is null :( \n we try again.`
         );
-
-        if (!ajsCookie || !ajsCookie.value) {
-          throw new Error(
-            `cookie ${MainCookieName} not found or is null :( \n we try again.`
-          );
-        }
-      } catch (error) {
-        console.log(`Error in L1: ${(error as Error).message}`);
-        config.retryCountL1++;
-        if (config.retryCountL1 < MAX_RETRIES_L1) {
-          console.log(`Retrying... (${config.retryCountL1}/${MAX_RETRIES_L1})`);
-          this.app(); // try again ..
-          return;
-        } else {
-          console.log("[L1] Max retries reached. Restarting...");
-          throw new Error("L1 dumped");
-        }
       }
 
       const cookieString = cookies
@@ -141,8 +97,7 @@ export class App extends Core {
       const sendDataToApi = async (data: any) => {
         try {
           const res = await axios.post(
-            this.config.EnvConfig.FUNDAMENTAL_API +
-              databasepSave,
+            this.config.EnvConfig.FUNDAMENTAL_API + databasepSave,
             JSON.stringify(data),
             {
               headers: {
@@ -167,8 +122,7 @@ export class App extends Core {
 
         try {
           const response = await axios.get(
-            this.config.EnvConfig.FUNDAMENTAL_API +
-              databasepGet,
+            this.config.EnvConfig.FUNDAMENTAL_API + databasepGet,
             {
               headers: {
                 Accept: "application/json",
@@ -194,7 +148,7 @@ export class App extends Core {
 
         const promises = nodes.map(async ({ node, saveTo }) => {
           console.log("on:", node);
-          const getData = new GetDataGlassnode(node, cookieString);
+          this.getDataGlassnode(node, cookieString);
 
           let timeStamp;
 
@@ -216,9 +170,9 @@ export class App extends Core {
 
           let data;
           if (timeStamp) {
-            data = await getData.getLast(timeStamp);
+            data = await this.getLast(timeStamp);
           } else {
-            data = await getData.getAll();
+            data = await this.getAll();
           }
 
           if (!data) {
@@ -242,7 +196,7 @@ export class App extends Core {
       await processNodes(nodes);
       console.log("All nodes processed");
       try {
-        if(this.config.Args.fast){
+        if (this.config.Args.fast) {
           fs.writeFileSync("data-sol.json", solData!);
           console.log("saved");
           fs.writeFileSync("data-doge.json", dogeData!);
@@ -253,6 +207,7 @@ export class App extends Core {
       }
     } finally {
       try {
+        console.log("[info app] browser closed.");
         await browser!.close();
       } catch (_) {
         console.log("Error in closing browser");
