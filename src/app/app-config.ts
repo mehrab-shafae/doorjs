@@ -9,5 +9,5 @@ export const config = {
 //--------------------------------------------------------
 export function resetTry() {
   config.retryCountL1 = 0;
-  config.retryCount = 0;
+  // config.retryCount = 0;
 }

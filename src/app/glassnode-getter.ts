@@ -3,18 +3,21 @@
 import axios from "axios";
 import { ENDPOINT_GLASSNODE_FEE, ENDPOINT_GLASSNODE_TX, HEADER_GLASSNODE_REQUESTS } from "../config.js";
 import { convertTimestampToISO } from "../misc/index.js";
+import { Core } from "@marboris/core";
 
 //--------------------------------------------------------
-export class GetDataGlassnode {
-  symbol: string;
-  authHeaders: string;
-  endpointTx: string;
-  endpointFee: string;
-  paramsTx: object;
-  paramsFee: object;
-  headers: object | any;
+export class GetDataGlassnode extends Core {
+  protected Main(): void {} // bug
 
-  constructor(symbol: string, authHeadersGlassnode: string) {
+  symbol!: string;
+  authHeaders!: string;
+  endpointTx!: string;
+  endpointFee!: string;
+  paramsTx!: object;
+  paramsFee!: object;
+  headers!: object | any;
+
+  getDataGlassnode(symbol: string, authHeadersGlassnode: string) {
     this.symbol = symbol;
     this.authHeaders = authHeadersGlassnode;
     this.endpointTx = ENDPOINT_GLASSNODE_TX;

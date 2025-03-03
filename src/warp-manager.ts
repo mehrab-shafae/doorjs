@@ -11,16 +11,13 @@ import {
   rmWarpCache,
 } from "./config.js";
 
-type Panic = () => void;
+import { App as AppClass } from "./app/app.js";
 
-class WarpManager {
-  private static childProcess: ChildProcess | null | undefined = null;
-  private static isWarpRunning = false;
+class WarpManager extends AppClass {
+  private childProcess: ChildProcess | null | undefined = null;
+  public isWarpRunning = false;
 
-  public static async startWarpPlus(
-    port: number,
-    panic: Panic
-  ): Promise<ChildProcess> {
+  public async startWarpPlus(port: number): Promise<ChildProcess> {
     return new Promise((resolve, reject) => {
       const command = `./${startWarpCmd} 127.0.0.1:${port} -v`;
       this.childProcess = exec(command);
@@ -28,6 +25,7 @@ class WarpManager {
       const timeoutId = setTimeout(async () => {
         if (this.isWarpRunning) return;
         await this.stopWarpPlus();
+        reject(new Error("warp timed out!"));
       }, WarpTimeout);
 
       this.childProcess.stdout?.on("data", async (data: string) => {
@@ -51,17 +49,14 @@ class WarpManager {
         console.log(`warp-plus exited with code ${code}`);
         this.isWarpRunning = false;
 
-        // if (code !== 0) {
         const errorMessage = `warp-plus terminated unexpectedly with code ${code}`;
         console.log(`[Error] ${errorMessage}`);
-        panic();
         reject(new Error("warp terminated unexpectedly!!"));
-        // }
       });
     });
   }
 
-  public static async findOpenPort(): Promise<number> {
+  public async findOpenPort(): Promise<number> {
     return new Promise((resolve, reject) => {
       const port = Math.floor(Math.random() * MAX_RANDOM_PORT) + 1;
       const server = net.createServer();
@@ -79,7 +74,7 @@ class WarpManager {
     });
   }
 
-  public static async stopWarpPlus(): Promise<void> {
+  public async stopWarpPlus(): Promise<void> {
     return new Promise((resolve) => {
       exec(killWarp, () => {
         exec(rmWarpCache, async () => {
