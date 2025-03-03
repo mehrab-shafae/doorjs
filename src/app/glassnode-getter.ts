@@ -6,9 +6,7 @@ import { convertTimestampToISO } from "../misc/index.js";
 import { Core } from "@marboris/core";
 
 //--------------------------------------------------------
-export class GetDataGlassnode extends Core {
-  protected Main(): void {} // bug
-
+export abstract class GetDataGlassnode extends Core {
   symbol!: string;
   authHeaders!: string;
   endpointTx!: string;

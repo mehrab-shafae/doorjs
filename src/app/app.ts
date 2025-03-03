@@ -17,7 +17,7 @@ import {
   proxy,
 } from "../config.js";
 
-export class App extends GetDataGlassnode {
+export abstract class App extends GetDataGlassnode {
   private cachePort: number | undefined;
 
   public setPort(warpPort: number) {

@@ -112,7 +112,7 @@ class MainCC extends WarpManager {
     console.log("[info] ~{5}`Cron job scheduled. It will run every night.`");
   }
 
-  Main() {
+  override Main() {
     initConfig(this.config.EnvConfig);
     //--------------------------------------------------------
     (async () => {

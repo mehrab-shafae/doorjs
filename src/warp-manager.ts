@@ -13,7 +13,7 @@ import {
 
 import { App as AppClass } from "./app/app.js";
 
-class WarpManager extends AppClass {
+abstract class WarpManager extends AppClass {
   private childProcess: ChildProcess | null | undefined = null;
   public isWarpRunning = false;
 
