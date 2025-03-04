@@ -73,4 +73,4 @@ RUN npm install --only=production
 
 # For test add: "--test", "--fast"
 ENTRYPOINT ["node", "dist/main.js", "--debug"]
-CMD []
+CMD ["--fast"]
