@@ -168,7 +168,7 @@ export abstract class App extends GetDataGlassnode {
               break;
           }
 
-          let data;
+          let data: any;
           if (timeStamp) {
             data = await this.getLast(timeStamp);
           } else {
@@ -183,6 +183,18 @@ export abstract class App extends GetDataGlassnode {
 
           console.log("send data to api");
           await sendDataToApi(data);
+
+          function getLength() {
+            if (Array.isArray(data)) {
+                return data.length;
+            } else if (typeof data === 'object' && data !== null) {
+                return Object.keys(data).length;
+            } else {
+                return 0;
+            }
+          }
+          console.log("length: ", getLength());
+        
         });
 
         await Promise.all(promises);
