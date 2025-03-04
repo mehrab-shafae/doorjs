@@ -1,9 +1,6 @@
 // on the core ;)
 // by Mehrab Shafae
-
 //--------------------------------------------------------
-// process.stdin.resume();
-
 import cron from "node-cron";
 import moment from "moment-timezone";
 
@@ -18,20 +15,6 @@ import {
   UtcFormat,
 } from "./config.js";
 import { config, resetTry, resetTryAll } from "./app/app-config.js";
-
-// function panicHandler(err: Error) {
-//   if (err.message === "Panic error") {
-//     console.log("App paniced! Whole app start again in 10 seconds");
-//     // (async () => {
-//     //   // await delay(10000);
-//     //   // console.log("[panic info] init Main")
-//     //   // const main = new MainCC();
-//     //   // await delay(5000);
-//     //   // console.log("[panic info] start pur.")
-//     //   // main.pur();
-//     // })();
-//   }
-// }
 
 //--------------------------------------------------------
 class MainCC extends WarpManager {
@@ -81,7 +64,7 @@ class MainCC extends WarpManager {
           resetTry();
           if (config.isRunning) {
             console.log(
-              "Previous instance is still running. Skipping this execution."
+              "[Core error] Previous instance is still running. Skipping this execution."
             );
             return;
           }
@@ -96,7 +79,6 @@ class MainCC extends WarpManager {
           try {
             await this.runWarp();
           } finally {
-            console.log("running false");
             config.isRunning = false;
           }
           await this.stopWarpPlus();
@@ -110,7 +92,7 @@ class MainCC extends WarpManager {
       }
     );
 
-    console.log("[info] ~{5}`Cron job scheduled. It will run every night.`");
+    console.log("[info] ~{5}`Cron job scheduled.`");
   }
 
   override Main() {
@@ -129,15 +111,3 @@ class MainCC extends WarpManager {
 }
 
 new MainCC();
-
-// do something when app is closing
-// process.on("exit", exitHandler.bind(null, { cleanup: true }));
-
-// catches ctrl+c event
-// process.on("SIGINT", exitHandler.bind(null, { exit: true }));
-
-// catches "kill pid" (for example: nodemon restart)
-// process.on("SIGUSR1", exitHandler.bind(null, { exit: true }));
-// process.on("SIGUSR2", exitHandler.bind(null, { exit: true }));
-
-// process.on("uncaughtException", panicHandler);
