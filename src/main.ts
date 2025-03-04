@@ -17,7 +17,7 @@ import {
   UnixTimeISOtz,
   UtcFormat,
 } from "./config.js";
-import { config, resetTry } from "./app/app-config.js";
+import { config, resetTry, resetTryAll } from "./app/app-config.js";
 
 // function panicHandler(err: Error) {
 //   if (err.message === "Panic error") {
@@ -92,6 +92,7 @@ class MainCC extends WarpManager {
           console.log(
             `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
           );
+          resetTryAll();
           try {
             await this.runWarp();
           } finally {
