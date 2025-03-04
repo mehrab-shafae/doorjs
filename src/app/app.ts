@@ -48,7 +48,7 @@ export abstract class App extends GetDataGlassnode {
         waitUntil: "networkidle0",
         timeout: HomePageTimeout,
       });
-      await page.reload(); // we need clear cache like ctrl+F5
+      await page.reload();
 
       console.log("We load the Glassnode site.. 8s waiting.");
       await new Promise((resolve) => setTimeout(resolve, 8000));
@@ -210,19 +210,15 @@ export abstract class App extends GetDataGlassnode {
       try {
         if (this.config.Args.fast) {
           fs.writeFileSync("data-sol.json", solData!);
-          console.log("saved");
           fs.writeFileSync("data-doge.json", dogeData!);
-          console.log("saved");
         }
       } catch (_) {
         console.log("Error in saving data to file!");
       }
     } finally {
       try {
-        console.log("[info app] browser closed.");
         await browser!.close();
       } catch (_) {
-        console.log("Error in closing browser");
       }
     }
   }
