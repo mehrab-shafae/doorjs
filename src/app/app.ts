@@ -16,8 +16,9 @@ import {
   databasepSave,
   proxy,
 } from "../config.js";
+import { Core } from "@marboris/core";
 
-export abstract class App extends GetDataGlassnode {
+export abstract class App extends Core {
   private cachePort: number | undefined;
 
   public setPort(warpPort: number) {
@@ -51,12 +52,21 @@ export abstract class App extends GetDataGlassnode {
       await page.reload();
 
       console.log("We load the Glassnode site.. 8s waiting.");
-      await new Promise((resolve) => setTimeout(resolve, 8000));
+      await new Promise((resolve) => setTimeout(resolve, 15000));
 
       await page.click('button[data-cy="login-btn"]');
 
       console.log("Login button founded ! we sleep 8s more..");
-      await new Promise((resolve) => setTimeout(resolve, 8000));
+      await new Promise((resolve) => setTimeout(resolve, 15000));
+
+      const recaptchaIframe = await page.$('iframe[title="reCAPTCHA"]');
+
+      if (recaptchaIframe) {
+          console.log('reCAPTCHA iframe found!');
+          throw new Error("reCAPTCHA founded :(");
+      } else {
+          console.log('reCAPTCHA iframe not found.');
+      }
 
       await page.type(
         'input[name="email"]',
@@ -148,7 +158,7 @@ export abstract class App extends GetDataGlassnode {
 
         const promises = nodes.map(async ({ node, saveTo }) => {
           console.log("on:", node);
-          this.getDataGlassnode(node, cookieString);
+          const getData = new GetDataGlassnode(node, cookieString);
 
           let timeStamp;
 
@@ -170,9 +180,9 @@ export abstract class App extends GetDataGlassnode {
 
           let data: any;
           if (timeStamp) {
-            data = await this.getLast(timeStamp);
+            data = await getData.getLast(timeStamp);
           } else {
-            data = await this.getAll();
+            data = await getData.getAll();
           }
 
           if (!data) {

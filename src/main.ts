@@ -26,6 +26,7 @@ class MainCC extends WarpManager {
       config.retryCountL1++;
       if (config.retryCountL1 < MAX_RETRIES_L1) {
         console.log(`Retrying... (${config.retryCountL1}/${MAX_RETRIES_L1})`);
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         await this.app(); // try again ..
       } else {
         console.log("[L1] Max retries reached. Restarting...");
@@ -46,8 +47,10 @@ class MainCC extends WarpManager {
     } catch (error) {
       console.log(`Error in main: ${(error as Error).message}`);
       config.retryCount++;
+      resetTry();
       if (config.retryCount < MAX_RETRIES) {
         console.log(`Retrying... (${config.retryCount}/${MAX_RETRIES})`);
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         await this.runWarp(); // try again ..
       } else {
         console.log("[error] Max retries reached. Aborting... :(");
@@ -61,7 +64,6 @@ class MainCC extends WarpManager {
       timeSc,
       async () => {
         try {
-          resetTry();
           if (config.isRunning) {
             console.log(
               "[Core error] Previous instance is still running. Skipping this execution."
