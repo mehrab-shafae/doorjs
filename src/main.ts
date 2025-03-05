@@ -46,6 +46,7 @@ class MainCC extends WarpManager {
     } catch (error) {
       console.log(`Error in main: ${(error as Error).message}`);
       config.retryCount++;
+      resetTry();
       if (config.retryCount < MAX_RETRIES) {
         console.log(`Retrying... (${config.retryCount}/${MAX_RETRIES})`);
         await this.runWarp(); // try again ..
@@ -61,7 +62,6 @@ class MainCC extends WarpManager {
       timeSc,
       async () => {
         try {
-          resetTry();
           if (config.isRunning) {
             console.log(
               "[Core error] Previous instance is still running. Skipping this execution."
