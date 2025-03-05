@@ -16,8 +16,9 @@ import {
   databasepSave,
   proxy,
 } from "../config.js";
+import { Core } from "@marboris/core";
 
-export abstract class App extends GetDataGlassnode {
+export abstract class App extends Core {
   private cachePort: number | undefined;
 
   public setPort(warpPort: number) {
@@ -157,7 +158,7 @@ export abstract class App extends GetDataGlassnode {
 
         const promises = nodes.map(async ({ node, saveTo }) => {
           console.log("on:", node);
-          this.getDataGlassnode(node, cookieString);
+          const getData = new GetDataGlassnode(node, cookieString);
 
           let timeStamp;
 
@@ -179,9 +180,9 @@ export abstract class App extends GetDataGlassnode {
 
           let data: any;
           if (timeStamp) {
-            data = await this.getLast(timeStamp);
+            data = await getData.getLast(timeStamp);
           } else {
-            data = await this.getAll();
+            data = await getData.getAll();
           }
 
           if (!data) {
