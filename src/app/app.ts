@@ -142,7 +142,7 @@ export abstract class App extends Core {
             }
           );
 
-          if (response.status === 200) {
+          if (response.status === 201) {
             let data;
             data = response.data.data || undefined;
             dogeTimestamp = data.DOGE || null;
