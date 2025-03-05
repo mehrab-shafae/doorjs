@@ -51,12 +51,21 @@ export abstract class App extends GetDataGlassnode {
       await page.reload();
 
       console.log("We load the Glassnode site.. 8s waiting.");
-      await new Promise((resolve) => setTimeout(resolve, 8000));
+      await new Promise((resolve) => setTimeout(resolve, 15000));
 
       await page.click('button[data-cy="login-btn"]');
 
       console.log("Login button founded ! we sleep 8s more..");
-      await new Promise((resolve) => setTimeout(resolve, 8000));
+      await new Promise((resolve) => setTimeout(resolve, 15000));
+
+      const recaptchaIframe = await page.$('iframe[title="reCAPTCHA"]');
+
+      if (recaptchaIframe) {
+          console.log('reCAPTCHA iframe found!');
+          throw new Error("reCAPTCHA founded :(");
+      } else {
+          console.log('reCAPTCHA iframe not found.');
+      }
 
       await page.type(
         'input[name="email"]',

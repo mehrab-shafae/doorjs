@@ -19,7 +19,7 @@
   "HomePage": "https://studio.glassnode.com/home",
   "MainCookieName": "ajs_anonymous_id",
   "MAX_RANDOM_PORT": 65535,
-  "HomePageTimeout": 90000,
+  "HomePageTimeout": 130000,
   "chrome": "/usr/bin/google-chrome-stable",
   "headless": 1,
   "proxy": 1,
