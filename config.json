@@ -14,7 +14,7 @@
   "KillPortDelay": 3000,
   "UnixTimeISOtz": "UTC",
   "UnixTimeISOr": "Z",
-  "MAX_RETRIES": 5,
+  "MAX_RETRIES": 6,
   "MAX_RETRIES_L1": 6,
   "HomePage": "https://studio.glassnode.com/home",
   "MainCookieName": "ajs_anonymous_id",
