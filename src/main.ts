@@ -99,9 +99,6 @@ class MainCC extends WarpManager {
 
   override Main() {
     initConfig(this.config.EnvConfig);
-    console.log("Hi env");
-    const array = JSON.parse(this.config.EnvConfig.array);
-    console.log(array[0]);
     //--------------------------------------------------------
     (async () => {
       if (this.config.Args.test) {
