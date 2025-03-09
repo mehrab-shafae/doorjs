@@ -44,12 +44,11 @@ export abstract class Handler extends Core {
       );
 
       // if (response.status === 201) {
-        let data = response.data.data || {};
+      let data = response.data.data || {};
 
-        // پر کردن timestamps به صورت خودکار
-        nodes.forEach((node) => {
-          timestamps[node] = data[node] || null;
-        });
+      nodes.forEach((node) => {
+        timestamps[node] = data[node] || null;
+      });
       // } else {
       //   throw new Error("Error fetching data from API");
       // }
