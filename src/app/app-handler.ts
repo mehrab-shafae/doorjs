@@ -53,8 +53,9 @@ export abstract class Handler extends Core {
       } else {
         throw new Error("Error fetching data from API");
       }
-    } catch (_) {
+    } catch (err) {
       console.log("Error in getting Timestamp from API!");
+      console.log("err: ", err)
     }
 
     const promises = nodes.map(async (node) => {
