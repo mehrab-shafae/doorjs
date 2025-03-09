@@ -28,9 +28,7 @@ export abstract class Handler extends Core {
   public async handler(cookie: string, nodes: Array<string>) {
     let dataStorage: { [key: string]: string } = {};
 
-    // const processNodes = async (
-    //   nodes: Array<string>
-    // ) => {
+    // const processNodes = async (nodes: Array<string>) => {
     let timestamps: { [key: string]: string | null } = {};
 
     try {
@@ -47,8 +45,11 @@ export abstract class Handler extends Core {
 
       if (response.status === 201) {
         let data = response.data.data || {};
-        timestamps.DOGE = data.DOGE || null;
-        timestamps.SOL = data.SOL || null;
+
+        // پر کردن timestamps به صورت خودکار
+        nodes.forEach((node) => {
+          timestamps[node] = data[node] || null;
+        });
       } else {
         throw new Error("Error fetching data from API");
       }
