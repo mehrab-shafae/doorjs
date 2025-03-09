@@ -1,0 +1,25 @@
+## Web Crawler with Puppeteer
+## >> IP Changer
+## Only for Linux systems
+
+Build:
+    npm i -g yarn typescript && yarn && tsc
+
+Test on local:
+    node . --debug --test
+
+Test on server:
+    node . --debug --fast
+
+Prod:
+    node . --debug
+
+"""
+Flags:
+    fast
+    test
+    debug: show messages to terminal
+"""
+
+# Usage
++ chmod +x ./bin/warp*
