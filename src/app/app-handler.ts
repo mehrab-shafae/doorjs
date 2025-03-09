@@ -28,7 +28,6 @@ export abstract class Handler extends Core {
   public async handler(cookie: string, nodes: Array<string>) {
     let dataStorage: { [key: string]: string } = {};
 
-    // const processNodes = async (nodes: Array<string>) => {
     let timestamps: { [key: string]: string | null } = {};
 
     try {
@@ -96,11 +95,7 @@ export abstract class Handler extends Core {
     });
 
     await Promise.all(promises);
-    // };
 
-    // const nodes = ["SOL", "DOGE", "OTHER_NODE_1", "OTHER_NODE_2"]; // آرایه‌ای از نودها
-
-    // await processNodes(nodes);
     console.log("All nodes processed");
 
     try {
