@@ -58,35 +58,39 @@ class MainCC extends WarpManager {
     }
   }
 
+  async prod() {
+    try {
+      if (config.isRunning) {
+        console.log(
+          "[Core error] Previous instance is still running. Skipping this execution."
+        );
+        return;
+      }
+
+      config.isRunning = true;
+
+      const timeInUTC = moment().utc().format(UtcFormat);
+      console.log(
+        `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
+      );
+      resetTryAll();
+      try {
+        await this.runWarp();
+      } finally {
+        config.isRunning = false;
+      }
+      await this.stopWarpPlus();
+    } catch (error) {
+      console.log("[Core Error] " + error);
+    }
+  }
+
   StartCron() {
     let timeSc = this.config.Args.fast ? CRONCtest : CRONC;
     cron.schedule(
       timeSc,
       async () => {
-        try {
-          if (config.isRunning) {
-            console.log(
-              "[Core error] Previous instance is still running. Skipping this execution."
-            );
-            return;
-          }
-
-          config.isRunning = true;
-
-          const timeInUTC = moment().utc().format(UtcFormat);
-          console.log(
-            `[warn] Hi! Current time in UTC: ${timeInUTC}, ~{19}\`We start the Core.\``
-          );
-          resetTryAll();
-          try {
-            await this.runWarp();
-          } finally {
-            config.isRunning = false;
-          }
-          await this.stopWarpPlus();
-        } catch (error) {
-          console.log("[Core Error] " + error);
-        }
+        await this.prod();
       },
       {
         scheduled: true,
@@ -104,6 +108,7 @@ class MainCC extends WarpManager {
       if (this.config.Args.test) {
         await this.app();
       } else {
+        await this.prod();
         this.StartCron();
       }
     })();
