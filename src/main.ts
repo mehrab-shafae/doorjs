@@ -8,7 +8,6 @@ import WarpManager from "./warp-manager.js";
 import {
   CRONC,
   CRONCtest,
-  initConfig,
   MAX_RETRIES,
   MAX_RETRIES_L1,
   UnixTimeISOtz,
@@ -102,8 +101,6 @@ class MainCC extends WarpManager {
   }
 
   override Main() {
-    initConfig(this.config.EnvConfig);
-    //--------------------------------------------------------
     (async () => {
       if (this.config.Args.test) {
         await this.app();
@@ -112,7 +109,6 @@ class MainCC extends WarpManager {
         this.StartCron();
       }
     })();
-    //--------------------------------------------------------
   }
   //--------------------------------------------------------
 }
