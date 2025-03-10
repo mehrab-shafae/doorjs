@@ -96,7 +96,7 @@ export abstract class App extends Handler {
       console.log(cookieString);
 
       const nodes = JSON.parse(this.config.EnvConfig.NODES);
-      this.handler(cookieString, nodes);
+      await this.handler(cookieString, nodes);
     } finally {
       try {
         await browser!.close();
