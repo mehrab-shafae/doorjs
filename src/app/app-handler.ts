@@ -99,10 +99,8 @@ export abstract class Handler extends Core {
     console.log("All nodes processed");
 
     try {
-      if (this.config.Args.fast) {
-        for (const [key, value] of Object.entries(dataStorage)) {
-          fs.writeFileSync(`data-${key.toLowerCase()}.json`, value!);
-        }
+      for (const [key, value] of Object.entries(dataStorage)) {
+        fs.writeFileSync(`data-${key.toLowerCase()}.json`, value!);
       }
     } catch (_) {
       console.log("Error in saving data to file!");
