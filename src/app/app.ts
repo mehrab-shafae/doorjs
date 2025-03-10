@@ -7,6 +7,7 @@ import {
   HomePage,
   HomePageTimeout,
   MainCookieName,
+  Nodes,
   proxy,
 } from "../config.js";
 import { Handler } from "./app-handler.js";
@@ -95,8 +96,7 @@ export abstract class App extends Handler {
         .join(";");
       console.log(cookieString);
 
-      const nodes = JSON.parse(this.config.EnvConfig.NODES);
-      await this.handler(cookieString, nodes);
+      await this.handler(cookieString, Nodes);
     } finally {
       try {
         await browser!.close();

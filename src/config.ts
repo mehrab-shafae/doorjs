@@ -3,6 +3,8 @@ import * as fs from 'fs';
 
 const config = JSON.parse(fs.readFileSync(cwd('', 'config.json'), 'utf-8'));
 
+export const Nodes = config.Nodes;
+
 export let ENDPOINT_GLASSNODE_TX = config.ENDPOINT_GLASSNODE_TX;
 export let ENDPOINT_GLASSNODE_FEE = config.ENDPOINT_GLASSNODE_FEE;
 

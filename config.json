@@ -27,5 +27,6 @@
   "databasepGet": "/feed/all_symbols/last_timestamps",
   "CRONC": "30 5 * * *",
   "CRONCtest": "*/2 * * * *",
-  "UtcFormat": "YYYY-MM-DD HH:mm:ss"
+  "UtcFormat": "YYYY-MM-DD HH:mm:ss",
+  "Nodes": ["SOL", "DOGE"]
 }
