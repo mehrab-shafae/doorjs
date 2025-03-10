@@ -28,5 +28,28 @@
   "CRONC": "30 5 * * *",
   "CRONCtest": "*/2 * * * *",
   "UtcFormat": "YYYY-MM-DD HH:mm:ss",
-  "Nodes": ["SOL", "DOGE"]
+  "Nodes": ["SOL", "DOGE"],
+  "endpoints": [
+    {
+      "name": "transactions",
+      "endpoint": "https://api.glassnode.com/v1/metrics/transactions/count",
+      "params": {
+        "i": "24h",
+        "referrer": "charts"
+      },
+      "responseKey": "number_of_transactions"
+    },
+    {
+      "name": "fees",
+      "endpoint": "https://api.glassnode.com/v1/metrics/fees/volume_sum",
+      "params": {
+        "i": "24h",
+        "referrer": "charts"
+      },
+      "responseKey": "total_fees_unit"
+    }
+  ],
+  "headers": {
+    "Content-Type": "application/json"
+  }
 }

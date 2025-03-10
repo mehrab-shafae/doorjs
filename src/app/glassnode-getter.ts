@@ -1,92 +1,69 @@
-// Glassnode
-
 import axios from "axios";
-import { ENDPOINT_GLASSNODE_FEE, ENDPOINT_GLASSNODE_TX, HEADER_GLASSNODE_REQUESTS } from "../config.js";
 import { convertTimestampToISO } from "../misc/index.js";
+import { config } from "../config.js";
 
-//--------------------------------------------------------
+interface EndpointConfig {
+  name: string;
+  endpoint: string;
+  params: object;
+  responseKey: string;
+}
+
+interface ParamsType {
+  a: string;
+  i: string;
+  referrer: string;
+  s?: string;
+}
+
 export class GetDataGlassnode {
-  symbol!: string;
-  authHeaders!: string;
-  endpointTx!: string;
-  endpointFee!: string;
-  paramsTx!: object;
-  paramsFee!: object;
-  headers!: object | any;
+  symbol: string;
+  authHeaders: string;
+  endpoints: EndpointConfig[];
+  headers: object;
 
   constructor(symbol: string, authHeadersGlassnode: string) {
     this.symbol = symbol;
     this.authHeaders = authHeadersGlassnode;
-    this.endpointTx = ENDPOINT_GLASSNODE_TX;
-    this.endpointFee = ENDPOINT_GLASSNODE_FEE;
-
-    const PARAMS_GLASSNODE_TX = {
-      a: symbol,
-      i: "24h",
-      referrer: "charts",
-    };
-    const PARAMS_GLASSNODE_FEE = {
-      a: symbol,
-      i: "24h",
-      referrer: "charts",
-    };
-
-    this.paramsTx = { ...PARAMS_GLASSNODE_TX };
-    this.paramsFee = { ...PARAMS_GLASSNODE_FEE };
-    this.headers = { ...HEADER_GLASSNODE_REQUESTS };
+    this.endpoints = config.endpoints.map((endpoint: any) => ({
+      ...endpoint,
+      params: {
+        ...endpoint.params,
+        a: symbol,
+      },
+    }));
+    this.headers = { ...config.headers };
   }
 
   async _checkConnection(status: string, lastTimestamp: number | null = null) {
-    this.headers.cookie = this.authHeaders;
+    this.headers = { ...this.headers, cookie: this.authHeaders };
 
     try {
-      let responseTx, responseFee;
+      const requests = this.endpoints.map((config) => {
+        const params: ParamsType = { ...config.params } as ParamsType;
 
-      if (status === "all") {
-        [responseTx, responseFee] = await Promise.all([
-          axios.get(this.endpointTx, {
-            params: this.paramsTx,
-            headers: this.headers,
-            timeout: 10000,
-          }),
-          axios.get(this.endpointFee, {
-            params: this.paramsFee,
-            headers: this.headers,
-            timeout: 10000,
-          }),
-        ]);
-      } else if (status === "last") {
-        const txParams = {
-          ...this.paramsTx,
-          s: lastTimestamp?.toString(),
-        };
-        const feeParams = {
-          ...this.paramsFee,
-          s: lastTimestamp?.toString(),
-        };
+        if (status === "last" && lastTimestamp) {
+          params.s = lastTimestamp.toString();
+        }
 
-        [responseTx, responseFee] = await Promise.all([
-          axios.get(this.endpointTx, {
-            params: txParams,
-            headers: this.headers,
-            timeout: 10000,
-          }),
-          axios.get(this.endpointFee, {
-            params: feeParams,
-            headers: this.headers,
-            timeout: 10000,
-          }),
-        ]);
-      } else {
-        return null;
-      }
+        return axios.get(config.endpoint, {
+          params,
+          headers: this.headers,
+          timeout: 10000,
+        });
+      });
 
-      if (responseTx.status === 200 && responseFee.status === 200) {
+      const responses = await Promise.all(requests);
+
+      if (responses.every((r) => r.status === 200)) {
         console.log("[info] Glassnode connection successful");
-        return { tx: responseTx.data, fee: responseFee.data };
+        return this.endpoints.reduce((acc, config, index) => {
+          acc[config.responseKey] = responses[index].data;
+          return acc;
+        }, {} as Record<string, any>);
       }
 
-      if ([responseTx.status, responseFee.status].includes(400)) {
+      if (responses.some((r) => r.status === 400)) {
         console.log("[warning] Bad timestamp parameter");
         return "bad timestamp parameter";
       }
@@ -120,28 +97,25 @@ export class GetDataGlassnode {
     return this._processData(connectionResult);
   }
 
-  _processData({ tx, fee }: { tx: any[]; fee: any[] }) {
+  _processData(responseData: Record<string, any[]>) {
     const processedData: any[] = [];
-    const txData: {
-      [key: string]: { transactions: number; fees?: number };
-    } = tx.reduce((acc, item) => {
-      acc[item.t] = { transactions: item.v };
-      return acc;
-    }, {} as { [key: string]: { transactions: number; fees?: number } });
+    const dataMap: any = {};
 
-    fee.forEach((item) => {
-      if (txData[item.t]) {
-        txData[item.t].fees = item.v;
-      }
+    Object.entries(responseData).forEach(([responseKey, data]) => {
+      data.forEach((item) => {
+        const timestamp = item.t.toString();
+        if (!dataMap[timestamp]) {
+          dataMap[timestamp] = {
+            symbol: this.symbol,
+            time: parseInt(timestamp),
+          };
+        }
+        dataMap[timestamp][responseKey] = item.v;
+      });
     });
 
-    for (const [timestamp, values] of Object.entries(txData)) {
-      processedData.push({
-        symbol: this.symbol,
-        time: parseInt(timestamp), // this._timestampToISO
-        number_of_transactions: values.transactions,
-        total_fees_unit: values.fees || null,
-      });
+    for (const timestamp of Object.keys(dataMap)) {
+      processedData.push(dataMap[timestamp]);
     }
 
     return processedData;
