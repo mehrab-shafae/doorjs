@@ -1,7 +1,7 @@
 import { cwd } from "./misc/cwd.js";
 import * as fs from "fs";
 
-const config = JSON.parse(fs.readFileSync(cwd("", "config.json"), "utf-8"));
+export const config = JSON.parse(fs.readFileSync(cwd("", "config.json"), "utf-8"));
 
 export const Nodes = config.Nodes;
 

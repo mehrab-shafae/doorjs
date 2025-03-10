@@ -13,7 +13,21 @@ import {
   UnixTimeISOtz,
   UtcFormat,
 } from "./config.js";
-import { config, resetTry, resetTryAll } from "./app/app-config.js";
+
+//--------------------------------------------------------
+
+let retryCount = 0;
+let retryCountL1 = 0;
+let isRunning = false;
+
+function resetTry() {
+  retryCountL1 = 0;
+}
+
+function resetTryAll() {
+  retryCountL1 = 0;
+  retryCount = 0;
+}
 
 //--------------------------------------------------------
 class MainCC extends WarpManager {
@@ -22,9 +36,9 @@ class MainCC extends WarpManager {
       await this.app();
     } catch (error) {
       console.log(`Error in L1: ${(error as Error).message}`);
-      config.retryCountL1++;
-      if (config.retryCountL1 < MAX_RETRIES_L1) {
-        console.log(`Retrying... (${config.retryCountL1}/${MAX_RETRIES_L1})`);
+      retryCountL1++;
+      if (retryCountL1 < MAX_RETRIES_L1) {
+        console.log(`Retrying... (${retryCountL1}/${MAX_RETRIES_L1})`);
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await this.app(); // try again ..
       } else {
@@ -45,10 +59,10 @@ class MainCC extends WarpManager {
       await this.runApp();
     } catch (error) {
       console.log(`Error in main: ${(error as Error).message}`);
-      config.retryCount++;
+      retryCount++;
       resetTry();
-      if (config.retryCount < MAX_RETRIES) {
-        console.log(`Retrying... (${config.retryCount}/${MAX_RETRIES})`);
+      if (retryCount < MAX_RETRIES) {
+        console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
         await new Promise((resolve) => setTimeout(resolve, 5000));
         await this.runWarp(); // try again ..
       } else {
@@ -59,14 +73,14 @@ class MainCC extends WarpManager {
 
   async prod() {
     try {
-      if (config.isRunning) {
+      if (isRunning) {
         console.log(
           "[Core error] Previous instance is still running. Skipping this execution."
         );
         return;
       }
 
-      config.isRunning = true;
+      isRunning = true;
 
       const timeInUTC = moment().utc().format(UtcFormat);
       console.log(
@@ -76,7 +90,7 @@ class MainCC extends WarpManager {
       try {
         await this.runWarp();
       } finally {
-        config.isRunning = false;
+        isRunning = false;
       }
       await this.stopWarpPlus();
     } catch (error) {
