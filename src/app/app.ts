@@ -58,8 +58,6 @@ export abstract class App extends Handler {
       if (recaptchaIframe) {
         console.log("reCAPTCHA iframe found!");
         throw new Error("reCAPTCHA founded :(");
-      } else {
-        console.log("reCAPTCHA iframe not found.");
       }
 
       await page.type(
