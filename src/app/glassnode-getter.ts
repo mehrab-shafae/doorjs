@@ -32,7 +32,11 @@ export class GetDataGlassnode {
         a: symbol,
       },
     }));
-    this.headers = { ...config.headers };
+    this.headers = {
+      ...{
+        "Content-Type": "application/json",
+      },
+    };
   }
 
   async _checkConnection(status: string, lastTimestamp: number | null = null) {

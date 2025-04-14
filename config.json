@@ -48,8 +48,5 @@
       },
       "responseKey": "total_fees_unit"
     }
-  ],
-  "headers": {
-    "Content-Type": "application/json"
-  }
+  ]
 }

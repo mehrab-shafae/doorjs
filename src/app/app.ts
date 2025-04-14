@@ -53,14 +53,14 @@ export abstract class App extends Handler {
       console.log("Login button founded ! we sleep 8s more..");
       await new Promise((resolve) => setTimeout(resolve, 15000));
 
-      const recaptchaIframe = await page.$('iframe[title="reCAPTCHA"]');
+      try{
+        const recaptchaIframe = await page.$('iframe[title="reCAPTCHA"]');
 
-      if (recaptchaIframe) {
-        console.log("reCAPTCHA iframe found!");
-        throw new Error("reCAPTCHA founded :(");
-      } else {
-        console.log("reCAPTCHA iframe not found.");
-      }
+        if (recaptchaIframe) {
+          console.log("reCAPTCHA iframe found!");
+          throw new Error("reCAPTCHA founded :(");
+        }
+      }catch(_){}
 
       await page.type(
         'input[name="email"]',

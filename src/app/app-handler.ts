@@ -27,7 +27,6 @@ export abstract class Handler extends Core {
 
   public async handler(cookie: string, nodes: Array<string>) {
     let dataStorage: { [key: string]: string } = {};
-
     let timestamps: { [key: string]: string | null } = {};
 
     try {
