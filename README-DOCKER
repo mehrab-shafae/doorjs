@@ -5,7 +5,7 @@
 
 ### local
 rm -rf node_m* *lock* dist
-
+###
 docker stop doorjs
 docker rm doorjs
 docker rmi $(docker images -q)
