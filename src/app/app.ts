@@ -79,16 +79,17 @@ export abstract class App extends Handler {
         }
       } catch (_) {}
 
-      await page.screenshot({ path: 'debug3.png' });
+      console.log(this.config.EnvConfig.EMAIL_GLASSNODE)
 
       await page.type(
         'input[name="email"]',
-        this.config.EnvConfig.EMAIL_GLASSNODE
+        String(this.config.EnvConfig.EMAIL_GLASSNODE) || ""
       );
+      
       await page.type(
         'input[name="current-password"]',
-        this.config.EnvConfig.PASSWORD_GLASSNODE
-      );
+        String(this.config.EnvConfig.PASSWORD_GLASSNODE) || ""
+      );      
 
       console.log("We try login...");
       await page.click("button.MuiButton-containedPrimary");
