@@ -6,14 +6,14 @@
 rm -rf node_m* *lock* dist
 
 ###
-docker stop doorjs
-docker rm doorjs
-docker rmi $(docker images -q)
-docker builder prune -a
+sudo docker stop doorjs
+sudo docker rm doorjs
+sudo docker rmi $(sudo docker images -q)
+sudo docker builder prune -a
 
 ## Build && Run
-docker build -t doorjs . && docker run --name doorjs --cap-add=SYS_ADMIN -d doorjs
+sudo docker build -t doorjs . && sudo docker run --name doorjs --cap-add=SYS_ADMIN -d doorjs
 
 ## Logs
-docker logs -f doorjs
+sudo docker logs -f doorjs
 ```
