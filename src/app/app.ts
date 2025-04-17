@@ -39,6 +39,7 @@ export abstract class App extends Handler {
 
       await page.deleteCookie(...(await page.cookies()));
       await page.setUserAgent(DefaultAgent);
+      await page.setViewport({ width: 1280, height: 800 }); // TODO()
       await page.goto(HomePage, {
         waitUntil: "networkidle0",
         timeout: HomePageTimeout,
@@ -48,28 +49,37 @@ export abstract class App extends Handler {
       console.log("We load the Glassnode site.. 8s waiting.");
       await new Promise((resolve) => setTimeout(resolve, 15000));
 
-      await page.screenshot({ path: 'debug.png' });
+      await page.screenshot({ path: 'debug2.png' });
 
-      // // await page.click('button[data-cy="login-btn"]');
+      await page.click('button[data-cy="login-btn"]');
+
       // const loginBtn = await page.$('[data-cy="login-btn"]');
       // if (loginBtn) {
       //   await loginBtn.click();
       // } else {
       //   console.log("Login button not found!!!");
-        // throw new Error("! :(");
+      //   throw new Error("! :(");
       // }
+
+      // await page.evaluate(() => {
+      //   const btn = document.querySelector('[data-cy="login-btn"]');
+      //   if (btn) {
+      //     (btn as HTMLElement).scrollIntoView();
+      //     (btn as HTMLElement).click();
+      //   }
+      // });
 
       console.log("Login button founded ! we sleep 8s more..");
       await new Promise((resolve) => setTimeout(resolve, 15000));
 
-      try{
+      try {
         const recaptchaIframe = await page.$('iframe[title="reCAPTCHA"]');
 
         if (recaptchaIframe) {
           console.log("reCAPTCHA iframe found!");
           throw new Error("reCAPTCHA founded :(");
         }
-      }catch(_){}
+      } catch (_) {}
 
       await page.type(
         'input[name="email"]',
