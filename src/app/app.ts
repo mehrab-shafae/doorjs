@@ -48,7 +48,14 @@ export abstract class App extends Handler {
       console.log("We load the Glassnode site.. 8s waiting.");
       await new Promise((resolve) => setTimeout(resolve, 15000));
 
-      await page.click('button[data-cy="login-btn"]');
+      // await page.click('button[data-cy="login-btn"]');
+      const loginBtn = await page.$('[data-cy="login-btn"]');
+      if (loginBtn) {
+        await loginBtn.click();
+      } else {
+        console.log("Login button not found!!!");
+        throw new Error("! :(");
+      }
 
       console.log("Login button founded ! we sleep 8s more..");
       await new Promise((resolve) => setTimeout(resolve, 15000));
