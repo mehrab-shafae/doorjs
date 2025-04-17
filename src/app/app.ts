@@ -49,8 +49,6 @@ export abstract class App extends Handler {
       console.log("We load the Glassnode site.. 8s waiting.");
       await new Promise((resolve) => setTimeout(resolve, 15000));
 
-      await page.screenshot({ path: 'debug2.png' });
-
       await page.click('button[data-cy="login-btn"]');
 
       // const loginBtn = await page.$('[data-cy="login-btn"]');
@@ -80,6 +78,8 @@ export abstract class App extends Handler {
           throw new Error("reCAPTCHA founded :(");
         }
       } catch (_) {}
+
+      await page.screenshot({ path: 'debug3.png' });
 
       await page.type(
         'input[name="email"]',
