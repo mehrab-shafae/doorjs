@@ -50,6 +50,8 @@ export class GetDataGlassnode {
           params.s = lastTimestamp.toString();
         }
 
+        console.log('endpoint:', config.endpoint);
+        console.log('params:', params);
         return axios.get(config.endpoint, {
           params,
           headers: this.headers,
