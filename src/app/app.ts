@@ -49,6 +49,7 @@ export abstract class App extends Handler {
       console.log("We load the Glassnode site.. 8s waiting.");
       await new Promise((resolve) => setTimeout(resolve, 15000));
 
+      ///////////// ------------------------------------------- ///////////////////
       await page.click('button[data-cy="login-btn"]');
 
       // const loginBtn = await page.$('[data-cy="login-btn"]');
@@ -66,6 +67,7 @@ export abstract class App extends Handler {
       //     (btn as HTMLElement).click();
       //   }
       // });
+      ///////////// ------------------------------------------- ///////////////////
 
       console.log("Login button founded ! we sleep 8s more..");
       await new Promise((resolve) => setTimeout(resolve, 15000));
@@ -79,17 +81,15 @@ export abstract class App extends Handler {
         }
       } catch (_) {}
 
-      console.log(this.config.EnvConfig.EMAIL_GLASSNODE)
-
       await page.type(
         'input[name="email"]',
-        String(this.config.EnvConfig.EMAIL_GLASSNODE) || ""
+        String(this.config.EnvConfig.EMAIL_GLASSNODE) || "" // NEW
       );
-      
+
       await page.type(
         'input[name="current-password"]',
         String(this.config.EnvConfig.PASSWORD_GLASSNODE) || ""
-      );      
+      );
 
       console.log("We try login...");
       await page.click("button.MuiButton-containedPrimary");
@@ -99,22 +99,22 @@ export abstract class App extends Handler {
 
       const cookies = await page.cookies();
 
-      console.log("try to find main cookie!");
+      console.log("try to find main cookie!\n cookies: ", cookies);
 
-      const ajsCookie = cookies.find(
-        (cookie) => cookie.name === MainCookieName
-      );
+      // const ajsCookie = cookies.find(
+      //   (cookie) => cookie.name === MainCookieName
+      // );
 
-      if (!ajsCookie || !ajsCookie.value) {
-        throw new Error(
-          `cookie ${MainCookieName} not found or is null :( \n we try again.`
-        );
-      }
+      // if (!ajsCookie || !ajsCookie.value) {
+      //   throw new Error(
+      //     `cookie ${MainCookieName} not found or is null :( \n we try again.`
+      //   );
+      // }
 
       const cookieString = cookies
         .map((cookie) => `${cookie.name}=${cookie.value}`)
         .join(";");
-      console.log(cookieString);
+      console.log("cookieString: ", cookieString);
 
       await this.handler(cookieString, Nodes);
     } finally {
