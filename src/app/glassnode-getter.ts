@@ -1,6 +1,6 @@
 import axios from "axios";
 import { convertTimestampToISO } from "../misc/index.js";
-import { config } from "../config.js";
+import { EndPoints } from "../config.js";
 
 interface EndpointConfig {
   name: string;
@@ -25,7 +25,7 @@ export class GetDataGlassnode {
   constructor(symbol: string, authHeadersGlassnode: string) {
     this.symbol = symbol;
     this.authHeaders = authHeadersGlassnode;
-    this.endpoints = config.endpoints.map((endpoint: any) => ({
+    this.endpoints = EndPoints.map((endpoint: any) => ({
       ...endpoint,
       params: {
         ...endpoint.params,

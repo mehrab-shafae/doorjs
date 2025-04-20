@@ -6,7 +6,6 @@ import {
   headless,
   HomePage,
   HomePageTimeout,
-  MainCookieName,
   Nodes,
   proxy,
 } from "../config.js";
@@ -94,12 +93,10 @@ export abstract class App extends Handler {
       console.log("We try login...");
       await page.click("button.MuiButton-containedPrimary");
 
-      console.log("We login :D ! We 20s waiting for cookies.");
+      console.log("We logged in. 20s sleep for cookies.");
       await new Promise((resolve) => setTimeout(resolve, 20000));
 
       const cookies = await page.cookies();
-
-      console.log("try to find main cookie!\n cookies: ", cookies);
 
       // const ajsCookie = cookies.find(
       //   (cookie) => cookie.name === MainCookieName
@@ -114,7 +111,6 @@ export abstract class App extends Handler {
       const cookieString = cookies
         .map((cookie) => `${cookie.name}=${cookie.value}`)
         .join(";");
-      console.log("cookieString: ", cookieString);
 
       await this.handler(cookieString, Nodes);
     } finally {

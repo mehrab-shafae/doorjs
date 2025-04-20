@@ -5,9 +5,6 @@ export const config = JSON.parse(fs.readFileSync(cwd("", "config.json"), "utf-8"
 
 export const Nodes = config.Nodes;
 
-export const ENDPOINT_GLASSNODE_TX = config.ENDPOINT_GLASSNODE_TX;
-export const ENDPOINT_GLASSNODE_FEE = config.ENDPOINT_GLASSNODE_FEE;
-
 export const DefaultAgent = config.DefaultAgent;
 export const HEADER_GLASSNODE_REQUESTS = config.HEADER_GLASSNODE_REQUESTS;
 
@@ -26,7 +23,6 @@ export const MAX_RETRIES = config.MAX_RETRIES;
 export const MAX_RETRIES_L1 = config.MAX_RETRIES_L1;
 
 export const HomePage = config.HomePage;
-export const MainCookieName = config.MainCookieName;
 
 export const MAX_RANDOM_PORT = config.MAX_RANDOM_PORT;
 
@@ -43,3 +39,5 @@ export const CRONC: string = config.CRONC;
 export const CRONCtest: string = config.CRONCtest;
 
 export const UtcFormat: string = config.UtcFormat;
+
+export const EndPoints: any = config.endpoints;
