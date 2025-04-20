@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { convertTimestampToISO } from "../misc/index.js";
 import { EndPoints } from "../config.js";
 import { HttpsProxyAgent } from "https-proxy-agent";
@@ -42,60 +42,109 @@ export class GetDataGlassnode {
     };
   }
 
-  async _checkConnection(status: string, lastTimestamp: number | null = null) {
-    this.headers = { ...this.headers, cookie: this.authHeaders };
+  private async sendRequest(
+    config: EndpointConfig,
+    status: string,
+    lastTimestamp?: number | null
+  ): Promise<AxiosResponse<any>> {
+    // تجمیع هدرها
+    const headers = { ...this.headers, cookie: this.authHeaders };
+
+    // پارامترها را کپی می‌کنیم
+    const params: ParamsType = { ...config.params } as ParamsType;
+    if (status === 'last' && lastTimestamp != null) {
+      params.s = lastTimestamp.toString();
+    }
+
+    // لاگ‌گیری جزئیات درخواست
+    console.debug('[request] URL:', config.endpoint);
+    console.debug('[request] Params:', params);
+    console.debug('[request] Headers:', headers);
+
+    const proxyUrl = `http://127.0.0.1:${this.cachePort}`;
+    const httpsAgent = new HttpsProxyAgent(proxyUrl);
 
     try {
-      const requests = this.endpoints.map((config) => {
-        const params: ParamsType = { ...config.params } as ParamsType;
-
-        if (status === "last" && lastTimestamp) {
-          params.s = lastTimestamp.toString();
-        }
-
-        // console.log('endpoint:', config.endpoint);
-        // console.log('params:', params);
-        // console.log('headers:', this.headers);
-        const proxyUrl = "http://127.0.0.1:" + this.cachePort;
-        const httpsAgent = new HttpsProxyAgent(proxyUrl);
-
-        return axios.get(config.endpoint, {
-          params,
-          headers: this.headers,
-          timeout: 10000,
-          httpsAgent,
-        });
+      const response = await axios.get(config.endpoint, {
+        params,
+        headers,
+        timeout: 10000,
+        httpsAgent,
       });
 
-      const responses = await Promise.all(requests);
+      // لاگ‌گیری جزئیات پاسخ
+      console.debug('[response] Status:', response.status);
+      console.debug('[response] Data:', response.data);
 
-      if (responses.every((r) => r.status === 200)) {
-        console.log("[info] Glassnode connection successful");
-        return this.endpoints.reduce((acc, config, index) => {
-          acc[config.responseKey] = responses[index].data;
+      return response;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        // سرور پاسخ با وضعیت خطا داده
+        console.error('[response error] Status:', error.response.status);
+        console.error('[response error] Data:', error.response.data);
+        console.error('[response error] Headers:', error.response.headers);
+      } else {
+        // خطایی در ارسال یا دریافت رخ داده (timeout، DNS و …)
+        console.error('[network error]', error.message);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * بررسی اتصال به Glassnode با اجرای همزمان درخواست‌ها
+   */
+  public async checkConnection(
+    status: string,
+    lastTimestamp: number | null = null
+  ): Promise<Record<string, any> | 'bad timestamp parameter' | null> {
+    // به‌روزرسانی هدرها
+    this.headers = { ...this.headers, cookie: this.authHeaders };
+
+    // ارسال همه درخواست‌ها
+    const promises = this.endpoints.map((cfg) =>
+      this.sendRequest(cfg, status, lastTimestamp)
+    );
+
+    try {
+      const results = await Promise.allSettled(promises);
+
+      // استخراج موفق/ناموفق
+      const successful = results.filter(r => r.status === 'fulfilled') as PromiseFulfilledResult<AxiosResponse<any>>[];
+      const failed = results.filter(r => r.status === 'rejected') as PromiseRejectedResult[];
+
+      if (successful.length === this.endpoints.length) {
+        console.info('[info] Glassnode connection successful');
+        // تجمیع داده‌ها
+        return this.endpoints.reduce((acc, cfg, idx) => {
+          acc[cfg.responseKey] = successful[idx].value.data;
           return acc;
         }, {} as Record<string, any>);
       }
 
-      if (responses.some((r) => r.status === 400)) {
-        console.log("[warning] Bad timestamp parameter");
-        return "bad timestamp parameter";
+      // حداقل یکی از پاسخ‌ها 400 بوده؟
+      const hasBadTimestamp = successful.some(res => res.value.status === 400);
+      if (hasBadTimestamp) {
+        console.warn('[warning] Bad timestamp parameter');
+        return 'bad timestamp parameter';
       }
 
-      console.log("[error] Connection to Glassnode failed");
+      // بررسی اگر همه با کد 403 یا دیگر خطاها سرریز شده‌اند
+      console.error('[error] Some requests failed:', failed.map(f => (f.reason as AxiosError).message));
       return null;
-    } catch (error: any) {
-      console.log(`[error] Connection error: ${error.message}`);
+    } catch (fatal) {
+      console.error('[error] Unexpected failure:', (fatal as Error).message);
       return null;
     }
   }
-
+  
   _timestampToISO(timestamp: number) {
     return convertTimestampToISO(timestamp);
   }
 
   async getAll() {
-    const connectionResult = await this._checkConnection("all");
+    const connectionResult = await this.checkConnection("all");
     if (!connectionResult || typeof connectionResult === "string") {
       return null;
     }
@@ -104,7 +153,7 @@ export class GetDataGlassnode {
   }
 
   async getLast(lastTimestamp: number) {
-    const connectionResult = await this._checkConnection("last", lastTimestamp);
+    const connectionResult = await this.checkConnection("last", lastTimestamp);
     if (!connectionResult) return null;
     if (typeof connectionResult === "string") return [];
 
