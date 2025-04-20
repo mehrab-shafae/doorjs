@@ -1,6 +1,6 @@
 import axios from "axios";
 import { convertTimestampToISO } from "../misc/index.js";
-import { EndPoints } from "../config.js";
+import { EndPoints, HEADER_GLASSNODE_REQUESTS } from "../config.js";
 
 interface EndpointConfig {
   name: string;
@@ -36,6 +36,7 @@ export class GetDataGlassnode {
       ...{
         "Content-Type": "application/json",
       },
+      ...HEADER_GLASSNODE_REQUESTS
     };
   }
 
@@ -52,6 +53,7 @@ export class GetDataGlassnode {
 
         console.log('endpoint:', config.endpoint);
         console.log('params:', params);
+        console.log('headers:', this.headers);
         return axios.get(config.endpoint, {
           params,
           headers: this.headers,
