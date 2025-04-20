@@ -13,6 +13,8 @@ import {
   UnixTimeISOtz,
   UtcFormat,
 } from "./config.js";
+import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 //--------------------------------------------------------
 
@@ -31,8 +33,37 @@ function resetTryAll() {
 
 //--------------------------------------------------------
 class MainCC extends WarpManager {
+  private Port: number | undefined;
+
+  private async pingServer(url: string) {
+    const start = performance.now();
+
+    const proxyUrl = "http://127.0.0.1:" + this.Port!;
+    const httpsAgent = new HttpsProxyAgent(proxyUrl);
+
+    await axios.get(url, {
+      timeout: 5000,
+      httpsAgent,
+    });
+
+    const end = performance.now();
+    const pingTime = end - start;
+    console.log(`Ping to ${url}: ${pingTime.toFixed(2)} ms`);
+  }
+
+  protected async pingForDuration(url: string, duration: number) {
+    const endTime = Date.now() + duration;
+
+    while (Date.now() < endTime) {
+      await this.pingServer(url);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+  }
+
+  
   async runApp() {
     try {
+      await this.pingForDuration("https://www.google.com", 10000);
       await this.app();
     } catch (error) {
       console.log(`Error in L1: ${(error as Error).message}`);
@@ -56,6 +87,7 @@ class MainCC extends WarpManager {
 
       await this.startWarpPlus(port);
       this.setPort(port);
+      this.Port = port;
       await this.runApp();
     } catch (error) {
       console.log(`Error in main: ${(error as Error).message}`);
