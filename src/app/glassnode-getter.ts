@@ -1,6 +1,7 @@
 import axios from "axios";
 import { convertTimestampToISO } from "../misc/index.js";
-import { EndPoints, HEADER_GLASSNODE_REQUESTS } from "../config.js";
+import { EndPoints } from "../config.js";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 interface EndpointConfig {
   name: string;
@@ -21,8 +22,10 @@ export class GetDataGlassnode {
   authHeaders: string;
   endpoints: EndpointConfig[];
   headers: object;
+  cachePort: number;
 
-  constructor(symbol: string, authHeadersGlassnode: string) {
+  constructor(symbol: string, authHeadersGlassnode: string, cachePort: number) {
+    this.cachePort = cachePort;
     this.symbol = symbol;
     this.authHeaders = authHeadersGlassnode;
     this.endpoints = EndPoints.map((endpoint: any) => ({
@@ -36,7 +39,6 @@ export class GetDataGlassnode {
       ...{
         "Content-Type": "application/json",
       },
-      ...HEADER_GLASSNODE_REQUESTS
     };
   }
 
@@ -51,13 +53,17 @@ export class GetDataGlassnode {
           params.s = lastTimestamp.toString();
         }
 
-        console.log('endpoint:', config.endpoint);
-        console.log('params:', params);
-        console.log('headers:', this.headers);
+        // console.log('endpoint:', config.endpoint);
+        // console.log('params:', params);
+        // console.log('headers:', this.headers);
+        const proxyUrl = "http://127.0.0.1:" + this.cachePort;
+        const httpsAgent = new HttpsProxyAgent(proxyUrl);
+
         return axios.get(config.endpoint, {
           params,
           headers: this.headers,
           timeout: 10000,
+          httpsAgent,
         });
       });
 

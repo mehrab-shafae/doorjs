@@ -6,7 +6,6 @@ export const config = JSON.parse(fs.readFileSync(cwd("", "config.json"), "utf-8"
 export const Nodes = config.Nodes;
 
 export const DefaultAgent = config.DefaultAgent;
-export const HEADER_GLASSNODE_REQUESTS = config.HEADER_GLASSNODE_REQUESTS;
 
 export const killWarp = config.killWarp;
 export const rmWarpCache = config.rmWarpCache;

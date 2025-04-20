@@ -25,7 +25,7 @@ export abstract class Handler extends Core {
     }
   };
 
-  public async handler(cookie: string, nodes: Array<string>) {
+  public async handler(cookie: string, nodes: Array<string>, cachePort: number) {
     let dataStorage: { [key: string]: string } = {};
     let timestamps: { [key: string]: string | null } = {};
 
@@ -56,7 +56,7 @@ export abstract class Handler extends Core {
 
     const promises = nodes.map(async (node) => {
       console.log("on:", node);
-      const getData = new GetDataGlassnode(node, cookie);
+      const getData = new GetDataGlassnode(node, cookie, cachePort);
 
       let timeStamp;
 

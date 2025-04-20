@@ -1,9 +1,5 @@
 {
   "DefaultAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0",
-  "HEADER_GLASSNODE_REQUESTS": {
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0",
-    "sec-ch-ua": "\"Not A(Brand\";v=\"8\", \"Chromium\";v=\"132\", \"Microsoft Edge\";v=\"132\""
-  },
   "killWarp": "pkill -f warp-plus",
   "rmWarpCache": "rm -rf .cache/warp-plus",
   "startWarpCmd": "bin/warp-plus --gool -b",
