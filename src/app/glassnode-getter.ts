@@ -47,19 +47,16 @@ export class GetDataGlassnode {
     status: string,
     lastTimestamp?: number | null
   ): Promise<AxiosResponse<any>> {
-    // تجمیع هدرها
     const headers = { ...this.headers, cookie: this.authHeaders };
 
-    // پارامترها را کپی می‌کنیم
     const params: ParamsType = { ...config.params } as ParamsType;
-    if (status === 'last' && lastTimestamp != null) {
+    if (status === "last" && lastTimestamp != null) {
       params.s = lastTimestamp.toString();
     }
 
-    // لاگ‌گیری جزئیات درخواست
-    console.debug('[request] URL:', config.endpoint);
-    console.debug('[request] Params:', params);
-    console.debug('[request] Headers:', headers);
+    // console.debug('[request] URL:', config.endpoint);
+    // console.debug('[request] Params:', params);
+    // console.debug('[request] Headers:', headers);
 
     const proxyUrl = `http://127.0.0.1:${this.cachePort}`;
     const httpsAgent = new HttpsProxyAgent(proxyUrl);
@@ -72,37 +69,28 @@ export class GetDataGlassnode {
         httpsAgent,
       });
 
-      // لاگ‌گیری جزئیات پاسخ
-      console.debug('[response] Status:', response.status);
-      console.debug('[response] Data:', response.data);
+      console.debug("[response] Status:", response.status);
+      console.debug("[response] Data:", response.data);
 
       return response;
     } catch (err) {
       const error = err as AxiosError;
       if (error.response) {
-        // سرور پاسخ با وضعیت خطا داده
-        console.error('[response error] Status:', error.response.status);
-        console.error('[response error] Data:', error.response.data);
-        console.error('[response error] Headers:', error.response.headers);
+        console.error("[response error] Status:", error.response.status);
+        console.error("[response error] Data:", error.response.data);
       } else {
-        // خطایی در ارسال یا دریافت رخ داده (timeout، DNS و …)
-        console.error('[network error]', error.message);
+        console.error("[network error]", error.message);
       }
       throw error;
     }
   }
 
-  /**
-   * بررسی اتصال به Glassnode با اجرای همزمان درخواست‌ها
-   */
   public async checkConnection(
     status: string,
     lastTimestamp: number | null = null
-  ): Promise<Record<string, any> | 'bad timestamp parameter' | null> {
-    // به‌روزرسانی هدرها
+  ): Promise<Record<string, any> | "bad timestamp parameter" | null> {
     this.headers = { ...this.headers, cookie: this.authHeaders };
 
-    // ارسال همه درخواست‌ها
     const promises = this.endpoints.map((cfg) =>
       this.sendRequest(cfg, status, lastTimestamp)
     );
@@ -110,35 +98,41 @@ export class GetDataGlassnode {
     try {
       const results = await Promise.allSettled(promises);
 
-      // استخراج موفق/ناموفق
-      const successful = results.filter(r => r.status === 'fulfilled') as PromiseFulfilledResult<AxiosResponse<any>>[];
-      const failed = results.filter(r => r.status === 'rejected') as PromiseRejectedResult[];
+      const successful = results.filter(
+        (r) => r.status === "fulfilled"
+      ) as PromiseFulfilledResult<AxiosResponse<any>>[];
+      const failed = results.filter(
+        (r) => r.status === "rejected"
+      ) as PromiseRejectedResult[];
 
       if (successful.length === this.endpoints.length) {
-        console.info('[info] Glassnode connection successful');
-        // تجمیع داده‌ها
+        console.info("[info] Glassnode connection successful");
+
         return this.endpoints.reduce((acc, cfg, idx) => {
           acc[cfg.responseKey] = successful[idx].value.data;
           return acc;
         }, {} as Record<string, any>);
       }
 
-      // حداقل یکی از پاسخ‌ها 400 بوده؟
-      const hasBadTimestamp = successful.some(res => res.value.status === 400);
+      const hasBadTimestamp = successful.some(
+        (res) => res.value.status === 400
+      );
       if (hasBadTimestamp) {
-        console.warn('[warning] Bad timestamp parameter');
-        return 'bad timestamp parameter';
+        console.warn("[warning] Bad timestamp parameter");
+        return "bad timestamp parameter";
       }
 
-      // بررسی اگر همه با کد 403 یا دیگر خطاها سرریز شده‌اند
-      console.error('[error] Some requests failed:', failed.map(f => (f.reason as AxiosError).message));
+      console.error(
+        "[error] Some requests failed:",
+        failed.map((f) => (f.reason as AxiosError).message)
+      );
       return null;
     } catch (fatal) {
-      console.error('[error] Unexpected failure:', (fatal as Error).message);
+      console.error("[error] Unexpected failure:", (fatal as Error).message);
       return null;
     }
   }
-  
+
   _timestampToISO(timestamp: number) {
     return convertTimestampToISO(timestamp);
   }
