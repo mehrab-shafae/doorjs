@@ -25,7 +25,11 @@ export abstract class Handler extends Core {
     }
   };
 
-  public async handler(cookie: string, nodes: Array<string>, cachePort: number) {
+  public async handler(
+    cookie: string,
+    nodes: Array<string>,
+    cachePort: number
+  ) {
     let dataStorage: { [key: string]: string } = {};
     let timestamps: { [key: string]: string | null } = {};
 
@@ -55,42 +59,46 @@ export abstract class Handler extends Core {
     }
 
     const promises = nodes.map(async (node) => {
-      console.log("on:", node);
-      const getData = new GetDataGlassnode(node, cookie, cachePort);
+      try {
+        console.log("on:", node);
+        const getData = new GetDataGlassnode(node, cookie, cachePort);
 
-      let timeStamp;
+        let timeStamp;
 
-      if (timestamps[node]) {
-        timeStamp = Math.floor(new Date(timestamps[node]).getTime() / 1000);
-        console.log(`${node} Timestamp: ${timeStamp}`);
-      }
-
-      let data: any;
-      if (timeStamp) {
-        data = await getData.getLast(timeStamp);
-      } else {
-        data = await getData.getAll();
-      }
-
-      if (!data) {
-        throw new Error("data is null!");
-      }
-
-      dataStorage[node] = JSON.stringify(data);
-
-      console.log("send data to api");
-      await this.sendDataToApi(data);
-
-      function getLength() {
-        if (Array.isArray(data)) {
-          return data.length;
-        } else if (typeof data === "object" && data !== null) {
-          return Object.keys(data).length;
-        } else {
-          return 0;
+        if (timestamps[node]) {
+          timeStamp = Math.floor(new Date(timestamps[node]).getTime() / 1000);
+          console.log(`${node} Timestamp: ${timeStamp}`);
         }
+
+        let data: any;
+        if (timeStamp) {
+          data = await getData.getLast(timeStamp);
+        } else {
+          data = await getData.getAll();
+        }
+
+        if (!data) {
+          throw new Error("data is null!");
+        }
+
+        dataStorage[node] = JSON.stringify(data);
+
+        console.log("send data to api");
+        await this.sendDataToApi(data);
+
+        function getLength() {
+          if (Array.isArray(data)) {
+            return data.length;
+          } else if (typeof data === "object" && data !== null) {
+            return Object.keys(data).length;
+          } else {
+            return 0;
+          }
+        }
+        console.log("length: ", getLength());
+      } catch (err) {
+        console.log(`${node} got errors : `, err);
       }
-      console.log("length: ", getLength());
     });
 
     await Promise.all(promises);
