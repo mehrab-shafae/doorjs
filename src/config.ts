@@ -3,8 +3,6 @@ import * as fs from "fs";
 
 export const config = JSON.parse(fs.readFileSync(cwd("", "config.json"), "utf-8"));
 
-export const MainCookieName = "_s";
-
 export const Nodes = config.Nodes;
 
 export const DefaultAgent = config.DefaultAgent;
