@@ -103,9 +103,6 @@ export abstract class App extends Handler {
       await delay(20000);
       await page.screenshot({ path: "4-click-login.png", fullPage: true });
 
-      await page.reload();
-      await page.screenshot({ path: "5-refresh.png", fullPage: true });
-
       // find userMenu_item-y3KcY class
       const selector = "span.userMenu_email-uv9Dx";
       const emailExists = await page
