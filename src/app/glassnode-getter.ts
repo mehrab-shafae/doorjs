@@ -75,7 +75,7 @@ export class GetDataGlassnode {
         return null;
       }
       console.warn(
-        `[error] ${config.responseKey} | Request failed and skipped.`
+        `[error] ${config.responseKey} | Request failed and skipped. Res: ${error.response?.data}`
       );
       return null;
     }
