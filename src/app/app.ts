@@ -11,6 +11,7 @@ import {
   proxy,
 } from "../config.js";
 import { Handler } from "./app-handler.js";
+import { delay } from "../misc/index.js";
 
 export abstract class App extends Handler {
   private cachePort: number | undefined;
@@ -42,13 +43,13 @@ export abstract class App extends Handler {
       await page.setUserAgent(DefaultAgent);
       await page.setViewport({ width: 1280, height: 800 }); // TODO()
       await page.goto(HomePage, {
-        waitUntil: "networkidle0",
+        waitUntil: "domcontentloaded", // domcontentloaded, networkidle0
         timeout: HomePageTimeout,
       });
       await page.reload();
 
       console.log("We load the Glassnode site.. 8s waiting.");
-      await new Promise((resolve) => setTimeout(resolve, 15000));
+      await delay(15000);
 
       ///////////// ------------------------------------------- ///////////////////
       await page.click('button[data-cy="login-btn"]');
@@ -71,7 +72,7 @@ export abstract class App extends Handler {
       ///////////// ------------------------------------------- ///////////////////
 
       console.log("Login button founded ! we sleep 8s more..");
-      await new Promise((resolve) => setTimeout(resolve, 15000));
+      await delay(15000);
 
       try {
         const recaptchaIframe = await page.$('iframe[title="reCAPTCHA"]');
@@ -82,9 +83,11 @@ export abstract class App extends Handler {
         }
       } catch (_) {}
 
+      const emailToFind = String(this.config.EnvConfig.EMAIL_GLASSNODE);
+
       await page.type(
         'input[name="email"]',
-        String(this.config.EnvConfig.EMAIL_GLASSNODE) || "" // NEW
+        emailToFind || "" // NEW
       );
 
       await page.type(
@@ -96,7 +99,20 @@ export abstract class App extends Handler {
       await page.click("button.MuiButton-containedPrimary");
 
       console.log("We logged in. 20s sleep for cookies.");
-      await new Promise((resolve) => setTimeout(resolve, 20000));
+      await delay(20000);
+
+      // find userMenu_item-y3KcY class
+      const selector = "span.userMenu_email-uv9Dx";
+      const emailExists = await page
+        .$eval(selector, (el) => el.textContent?.trim())
+        .then((text) => text === emailToFind)
+        .catch(() => false);
+
+      if (!emailExists) {
+        throw new Error(`خطا: ایمیل ${emailToFind} در صفحه یافت نشد.`);
+      } else {
+        console.log(`ایمیل ${emailToFind} با موفقیت پیدا شد.`);
+      }
 
       // const cookies = await page.cookies();
       const cookies = await browser.cookies();
