@@ -112,6 +112,7 @@ export abstract class App extends Handler {
         .map((cookie) => `${cookie.name}=${cookie.value}`)
         .join(";");
 
+      console.log(`cookieString: ${cookieString}`);
       await this.handler(cookieString, Nodes, this.cachePort!);
     } finally {
       try {
