@@ -71,8 +71,8 @@ export abstract class Handler extends Core {
           ? await getter.getLast(timestamp)
           : await getter.getAll();
 
-        if (!data || !Array.isArray(data)) {
-          console.warn(`[!] No data returned for ${node}, skipping...`);
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          console.warn(`[!] No valid data for ${node}, skipping...`);
           continue;
         }
 
