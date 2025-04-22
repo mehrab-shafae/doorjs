@@ -6,6 +6,7 @@ import {
   headless,
   HomePage,
   HomePageTimeout,
+  MainCookieName,
   Nodes,
   proxy,
 } from "../config.js";
@@ -35,8 +36,9 @@ export abstract class App extends Handler {
 
       console.log("Puppeteer is starting...");
       const page = await browser.newPage();
+      await browser.deleteCookie(...(await browser.cookies()));
+      await browser.deleteCookie(); // idk
 
-      await page.deleteCookie(...(await page.cookies()));
       await page.setUserAgent(DefaultAgent);
       await page.setViewport({ width: 1280, height: 800 }); // TODO()
       await page.goto(HomePage, {
@@ -96,17 +98,18 @@ export abstract class App extends Handler {
       console.log("We logged in. 20s sleep for cookies.");
       await new Promise((resolve) => setTimeout(resolve, 20000));
 
-      const cookies = await page.cookies();
+      // const cookies = await page.cookies();
+      const cookies = await browser.cookies();
 
-      // const ajsCookie = cookies.find(
-      //   (cookie) => cookie.name === MainCookieName
-      // );
+      const ajsCookie = cookies.find(
+        (cookie) => cookie.name === MainCookieName
+      );
 
-      // if (!ajsCookie || !ajsCookie.value) {
-      //   throw new Error(
-      //     `cookie ${MainCookieName} not found or is null :( \n we try again.`
-      //   );
-      // }
+      if (!ajsCookie || !ajsCookie.value) {
+        throw new Error(
+          `cookie ${MainCookieName} not found or is null :( \n we try again.`
+        );
+      }
 
       const cookieString = cookies
         .map((cookie) => `${cookie.name}=${cookie.value}`)
