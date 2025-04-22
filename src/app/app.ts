@@ -38,15 +38,16 @@ export abstract class App extends Handler {
       console.log("Puppeteer is starting...");
       const page = await browser.newPage();
       await browser.deleteCookie(...(await browser.cookies()));
-      await browser.deleteCookie(); // idk
+      // await browser.deleteCookie(); // idk
 
-      await page.setUserAgent(DefaultAgent);
+      // await page.setUserAgent(DefaultAgent);
       await page.setViewport({ width: 1280, height: 800 }); // TODO()
       await page.goto(HomePage, {
         waitUntil: "domcontentloaded", // domcontentloaded, networkidle0
         timeout: HomePageTimeout,
       });
       await page.reload();
+      await page.screenshot({ path: '1-reload.png', fullPage: true });
 
       console.log("We load the Glassnode site.. 8s waiting.");
       await delay(15000);
@@ -74,6 +75,8 @@ export abstract class App extends Handler {
       console.log("Login button founded ! we sleep 8s more..");
       await delay(15000);
 
+      await page.screenshot({ path: '2-login-button.png', fullPage: true });
+
       try {
         const recaptchaIframe = await page.$('iframe[title="reCAPTCHA"]');
 
@@ -96,10 +99,15 @@ export abstract class App extends Handler {
       );
 
       console.log("We try login...");
+      await page.screenshot({ path: '3-type.png', fullPage: true });
       await page.click("button.MuiButton-containedPrimary");
 
       console.log("We logged in. 20s sleep for cookies.");
       await delay(20000);
+      await page.screenshot({ path: '4-click-login.png', fullPage: true });
+
+      await page.reload();
+      await page.screenshot({ path: '5-refresh.png', fullPage: true });
 
       // find userMenu_item-y3KcY class
       const selector = "span.userMenu_email-uv9Dx";
