@@ -1,5 +1,4 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
-import { convertTimestampToISO } from "../misc/index.js";
+import axios, { AxiosError } from "axios";
 import { EndPoints } from "../config.js";
 import { HttpsProxyAgent } from "https-proxy-agent";
 
@@ -23,143 +22,114 @@ export class GetDataGlassnode {
   endpoints: EndpointConfig[];
   headers: object;
   cachePort: number;
+  private httpsAgent: HttpsProxyAgent<string>;
 
   constructor(symbol: string, authHeadersGlassnode: string, cachePort: number) {
-    this.cachePort = cachePort;
     this.symbol = symbol;
     this.authHeaders = authHeadersGlassnode;
+    this.cachePort = cachePort;
+
     this.endpoints = EndPoints.map((endpoint: any) => ({
       ...endpoint,
-      params: {
-        ...endpoint.params,
-        a: symbol,
-      },
+      params: { ...endpoint.params, a: symbol },
     }));
-    this.headers = {
-      ...{
-        "Content-Type": "application/json",
-      },
-    };
+
+    this.headers = { "Content-Type": "application/json" };
+
+    const proxyUrl = `http://127.0.0.1:${this.cachePort}`;
+    this.httpsAgent = new HttpsProxyAgent<string>(proxyUrl);
   }
 
   private async sendRequest(
     config: EndpointConfig,
     status: string,
     lastTimestamp?: number | null
-  ): Promise<AxiosResponse<any> | undefined> {
-    const headers = { ...this.headers, cookie: this.authHeaders };
-
-    const params: ParamsType = { ...config.params } as ParamsType;
+  ): Promise<{ key: string; data: any[] } | null> {
+    const params: ParamsType = { ...(config.params as ParamsType) };
     if (status === "last" && lastTimestamp != null) {
       params.s = lastTimestamp.toString();
     }
 
-    console.debug('[request] URL:', config.endpoint);
-    console.debug('[request] Params:', params);
-    // console.debug('[request] Headers:', headers);
+    const headers = { ...this.headers, cookie: this.authHeaders };
 
-    const proxyUrl = `http://127.0.0.1:${this.cachePort}`;
-    const httpsAgent = new HttpsProxyAgent(proxyUrl);
+    console.log(
+      `[request] GET ${config.endpoint} | Params: ${JSON.stringify(params)}`
+    );
 
     try {
       const response = await axios.get(config.endpoint, {
         params,
         headers,
         timeout: 10000,
-        httpsAgent,
+        httpsAgent: this.httpsAgent,
       });
 
-      console.debug("[response] Status:", response.status);
-      console.debug("[response] Data:", response.data);
-
-      return response;
+      console.log(
+        `[success] ${config.responseKey} | Status: ${response.status}`
+      );
+      return { key: config.responseKey, data: response.data };
     } catch (err) {
       const error = err as AxiosError;
-      if (error.response) {
-        console.error("[response error] Status:", error.response.status);
-        console.error("[response error] Data:", error.response.data);
-      } else {
-        console.error("[network error]", error.message);
+      if (error.response?.status === 400) {
+        console.warn(`[warning] ${config.responseKey} | Bad timestamp param`);
+        return null;
       }
-      // throw error;
+      console.warn(
+        `[error] ${config.responseKey} | Request failed and skipped.`
+      );
+      return null;
     }
   }
 
   public async checkConnection(
-    status: string,
+    status: "all" | "last",
     lastTimestamp: number | null = null
-  ): Promise<Record<string, any> | "bad timestamp parameter" | null> {
-    this.headers = { ...this.headers, cookie: this.authHeaders };
+  ): Promise<Record<string, any[]> | "bad timestamp parameter" | null> {
+    const result: Record<string, any[]> = {};
+    let hasBadTimestamp = false;
 
-    const promises = this.endpoints.map((cfg) =>
-      this.sendRequest(cfg, status, lastTimestamp)
-    );
+    for (const config of this.endpoints) {
+      const res = await this.sendRequest(config, status, lastTimestamp);
 
-    try {
-      const results = await Promise.allSettled(promises);
-
-      const successful = results.filter(
-        (r) => r.status === "fulfilled"
-      ) as PromiseFulfilledResult<AxiosResponse<any>>[];
-      const failed = results.filter(
-        (r) => r.status === "rejected"
-      ) as PromiseRejectedResult[];
-
-      if (successful.length === this.endpoints.length) {
-        console.info("[info] Glassnode connection successful");
-
-        return this.endpoints.reduce((acc, cfg, idx) => {
-          acc[cfg.responseKey] = successful[idx].value.data;
-          return acc;
-        }, {} as Record<string, any>);
+      if (res === null) continue;
+      if (
+        Array.isArray(res.data) &&
+        res.data.length > 0 &&
+        res.data[0]?.status === 400
+      ) {
+        hasBadTimestamp = true;
+        continue;
       }
 
-      const hasBadTimestamp = successful.some(
-        (res) => res.value.status === 400
-      );
-      if (hasBadTimestamp) {
-        console.warn("[warning] Bad timestamp parameter");
-        return "bad timestamp parameter";
-      }
-
-      console.error(
-        "[error] Some requests failed:",
-        failed.map((f) => (f.reason as AxiosError).message)
-      );
-      return null;
-    } catch (fatal) {
-      console.error("[error] Unexpected failure:", (fatal as Error).message);
-      return null;
+      result[res.key] = res.data;
     }
-  }
 
-  _timestampToISO(timestamp: number) {
-    return convertTimestampToISO(timestamp);
+    if (hasBadTimestamp) return "bad timestamp parameter";
+    if (Object.keys(result).length === 0) return null;
+
+    return result;
   }
 
   async getAll() {
-    const connectionResult = await this.checkConnection("all");
-    if (!connectionResult || typeof connectionResult === "string") {
-      return null;
-    }
+    const responseData = await this.checkConnection("all");
+    if (!responseData || typeof responseData === "string") return null;
 
-    return this._processData(connectionResult);
+    return this._processData(responseData);
   }
 
   async getLast(lastTimestamp: number) {
-    const connectionResult = await this.checkConnection("last", lastTimestamp);
-    if (!connectionResult) return null;
-    if (typeof connectionResult === "string") return [];
+    const responseData = await this.checkConnection("last", lastTimestamp);
+    if (!responseData || typeof responseData === "string") return [];
 
-    return this._processData(connectionResult);
+    return this._processData(responseData);
   }
 
-  _processData(responseData: Record<string, any[]>) {
-    const processedData: any[] = [];
-    const dataMap: any = {};
+  private _processData(responseData: Record<string, any[]>): any[] {
+    // Maps data by timestamp
+    const dataMap: Record<string, any> = {};
 
-    Object.entries(responseData).forEach(([responseKey, data]) => {
-      data.forEach((item) => {
+    for (const [key, dataset] of Object.entries(responseData)) {
+      for (const item of dataset) {
         const timestamp = item.t.toString();
         if (!dataMap[timestamp]) {
           dataMap[timestamp] = {
@@ -167,14 +137,11 @@ export class GetDataGlassnode {
             time: parseInt(timestamp),
           };
         }
-        dataMap[timestamp][responseKey] = item.v;
-      });
-    });
-
-    for (const timestamp of Object.keys(dataMap)) {
-      processedData.push(dataMap[timestamp]);
+        dataMap[timestamp][key] = item.v;
+      }
     }
 
-    return processedData;
+    // Convert to array
+    return Object.values(dataMap);
   }
 }
