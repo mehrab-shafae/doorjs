@@ -60,8 +60,8 @@ export class GetDataGlassnode {
       const response = await axios.get(config.endpoint, {
         params,
         headers,
-        timeout: 10000,
-        httpsAgent: this.httpsAgent,
+        // timeout: 10000,
+        // httpsAgent: this.httpsAgent,
       });
 
       console.log(
