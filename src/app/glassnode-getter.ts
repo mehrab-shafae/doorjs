@@ -54,8 +54,8 @@ export class GetDataGlassnode {
       params.s = lastTimestamp.toString();
     }
 
-    // console.debug('[request] URL:', config.endpoint);
-    // console.debug('[request] Params:', params);
+    console.debug('[request] URL:', config.endpoint);
+    console.debug('[request] Params:', params);
     // console.debug('[request] Headers:', headers);
 
     const proxyUrl = `http://127.0.0.1:${this.cachePort}`;
