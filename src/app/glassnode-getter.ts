@@ -46,7 +46,7 @@ export class GetDataGlassnode {
     config: EndpointConfig,
     status: string,
     lastTimestamp?: number | null
-  ): Promise<AxiosResponse<any>> {
+  ): Promise<AxiosResponse<any> | undefined> {
     const headers = { ...this.headers, cookie: this.authHeaders };
 
     const params: ParamsType = { ...config.params } as ParamsType;
@@ -81,7 +81,7 @@ export class GetDataGlassnode {
       } else {
         console.error("[network error]", error.message);
       }
-      throw error;
+      // throw error;
     }
   }
 
