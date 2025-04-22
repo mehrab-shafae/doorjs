@@ -5,7 +5,8 @@ import { GetDataGlassnode } from "./glassnode-getter.js";
 import { Core } from "@marboris/core";
 
 export abstract class Handler extends Core {
-  sendDataToApi = async (data: any) => {
+  // Send data to API
+  private async sendDataToApi(data: any) {
     try {
       const res = await axios.post(
         this.config.EnvConfig.FUNDAMENTAL_API + databasepSave,
@@ -18,21 +19,18 @@ export abstract class Handler extends Core {
           timeout: 5000,
         }
       );
-      console.log("Response:", res.status);
+      console.log("[✓] API Response:", res.status);
     } catch (error) {
-      console.log("[Error] sendDataToApi => Axios error!");
-      return;
+      console.error("[✗] Failed to send data to API.");
     }
-  };
+  }
 
-  public async handler(
-    cookie: string,
-    nodes: Array<string>,
-    cachePort: number
-  ) {
-    let dataStorage: { [key: string]: string } = {};
-    let timestamps: { [key: string]: string | null } = {};
+  // Main handler
+  public async handler(cookie: string, nodes: string[], cachePort: number) {
+    const dataStorage: Record<string, string> = {};
+    const timestamps: Record<string, string | null> = {};
 
+    // Step 1: Load previous timestamps from API
     try {
       const response = await axios.get(
         this.config.EnvConfig.FUNDAMENTAL_API + databasepGet,
@@ -45,72 +43,59 @@ export abstract class Handler extends Core {
         }
       );
 
-      // if (response.status === 201) {
-      let data = response.data.data || {};
-
-      nodes.forEach((node) => {
+      const data = response.data?.data || {};
+      for (const node of nodes) {
         timestamps[node] = data[node] || null;
-      });
-      // } else {
-      //   throw new Error("Error fetching data from API");
-      // }
-    } catch (_) {
-      console.log("Error in getting Timestamp from API!");
+      }
+      console.log("[✓] Timestamps loaded.");
+    } catch {
+      console.warn("[!] Failed to load timestamps from API.");
     }
 
-    const promises = nodes.map(async (node) => {
+    // Step 2: Handle each node in sequence
+    for (const node of nodes) {
+      console.log("───");
+      console.log(`[>] Handling node: ${node}`);
+
       try {
-        console.log("on:", node);
-        const getData = new GetDataGlassnode(node, cookie, cachePort);
+        const getter = new GetDataGlassnode(node, cookie, cachePort);
 
-        let timeStamp;
+        const rawTimestamp = timestamps[node];
+        const timestamp = rawTimestamp
+          ? Math.floor(new Date(rawTimestamp).getTime() / 1000)
+          : null;
 
-        if (timestamps[node]) {
-          timeStamp = Math.floor(new Date(timestamps[node]).getTime() / 1000);
-          console.log(`${node} Timestamp: ${timeStamp}`);
+        console.log(`[i] Timestamp: ${timestamp || "None"}`);
+
+        const data = timestamp
+          ? await getter.getLast(timestamp)
+          : await getter.getAll();
+
+        if (!data || !Array.isArray(data)) {
+          console.warn(`[!] No data returned for ${node}, skipping...`);
+          continue;
         }
 
-        let data: any;
-        if (timeStamp) {
-          data = await getData.getLast(timeStamp);
-        } else {
-          data = await getData.getAll();
-        }
+        const serialized = JSON.stringify(data);
+        dataStorage[node] = serialized;
 
-        if (!data) {
-          throw new Error("data is null!");
-        }
-
-        dataStorage[node] = JSON.stringify(data);
-
-        console.log("send data to api");
+        console.log(`[✓] Data length: ${data.length}`);
         await this.sendDataToApi(data);
-
-        function getLength() {
-          if (Array.isArray(data)) {
-            return data.length;
-          } else if (typeof data === "object" && data !== null) {
-            return Object.keys(data).length;
-          } else {
-            return 0;
-          }
-        }
-        console.log("length: ", getLength());
       } catch (err) {
-        console.log(`${node} got errors : `, err);
+        console.warn(`[✗] Failed on ${node}, skipping.`);
       }
-    });
-
-    await Promise.all(promises);
-
-    console.log("All nodes processed");
-
-    try {
-      for (const [key, value] of Object.entries(dataStorage)) {
-        fs.writeFileSync(`data-${key.toLowerCase()}.json`, value!);
-      }
-    } catch (_) {
-      console.log("Error in saving data to file!");
     }
+
+    // Step 3: Save all data to local files
+    try {
+      for (const [node, json] of Object.entries(dataStorage)) {
+        fs.writeFileSync(`data-${node.toLowerCase()}.json`, json);
+        console.log(`[💾] Saved: data-${node.toLowerCase()}.json`);
+      }
+    } catch {
+      console.error("[✗] Failed to write some files.");
+    }
+
+    console.log("✅ All nodes handled.");
   }
 }
