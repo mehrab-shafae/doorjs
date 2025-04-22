@@ -148,6 +148,11 @@ class MainCC extends WarpManager {
 
   override Main() {
     (async () => {
+      const emailToFind = this.config.EnvConfig.EMAIL_GLASSNODE || null;
+      const passwordToFind = this.config.EnvConfig.PASSWORD_GLASSNODE || null;
+      if(!emailToFind) throw Error("[env] email null");
+      if(!passwordToFind) throw Error("[env] password null");
+
       if (this.config.Args.test) {
         await this.app();
       } else {
