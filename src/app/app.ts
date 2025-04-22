@@ -110,12 +110,12 @@ export abstract class App extends Handler {
           `cookie ${MainCookieName} not found or is null :( \n we try again.`
         );
       }
+      console.log(`ajsCookie: ${ajsCookie.name} ${ajsCookie.value}`);
 
       const cookieString = cookies
         .map((cookie) => `${cookie.name}=${cookie.value}`)
         .join(";");
 
-      console.log(`cookieString: ${cookieString}`);
       await this.handler(cookieString, Nodes, this.cachePort!);
     } finally {
       try {
