@@ -1,2 +1,0 @@
-# Special Symbols Request JS
-
